@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>中國科技大學建築系｜建築設計課程法規導航系統 Ver.02 (SYSTEM 03)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@600;700&display=swap');
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background-color: #F7F5F0;
+      color: #1F2937;
+    }
+    .serif-title {
+      font-family: 'Noto Serif TC', serif;
+    }
+    .cute-green {
+      background-color: #2C4C43;
+    }
+    .cute-green-text {
+      color: #2C4C43;
+    }
+    .cute-border {
+      border-color: #D6D2C4;
+    }
+    /* 自訂捲軸 */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #F7F5F0; }
+    ::-webkit-scrollbar-thumb { background: #9CA3AF; border-radius: 3px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- 頂部導覽列（對齊中國科大建築法規檢核系統米白＋深墨綠風格） -->
+  <header class="bg-white border-b cute-border sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full cute-green text-white flex items-center justify-center font-bold text-lg shadow-sm">
+          中
+        </div>
+        <div>
+          <div class="text-xs text-gray-500 tracking-wider">中國科技大學 規劃與設計學院 建築系 ｜ SYSTEM 03</div>
+          <h1 class="text-lg sm:text-xl font-bold serif-title cute-green-text">
+            建築設計課程法規導航系統 <span class="text-xs font-normal bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded ml-1">Ver.02 整合雙北桃竹自治條例 × 建技官方圖例</span>
+          </h1>
+        </div>
+      </div>
+
+      <!-- 主功能分頁切換 -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <button onclick="switchMainTab('navigator')" id="tab-btn-navigator" class="px-3.5 py-1.5 rounded text-sm font-medium cute-green text-white transition">
+          🔍 設計法規導航
+        </button>
+        <button onclick="switchMainTab('calculator')" id="tab-btn-calculator" class="px-3.5 py-1.5 rounded text-sm font-medium bg-stone-100 text-gray-700 hover:bg-stone-200 transition">
+          📐 設計快算器 (容積/坡道/樓梯)
+        </button>
+        <button onclick="switchMainTab('pipeline')" id="tab-btn-pipeline" class="px-3.5 py-1.5 rounded text-sm font-medium bg-stone-100 text-gray-700 hover:bg-stone-200 transition">
+          🐍 openlawtw 轉檔腳本 (Ver.02)
+        </button>
+        <label class="cursor-pointer px-3 py-1.5 rounded text-xs font-medium border border-emerald-700 text-emerald-800 hover:bg-emerald-50 transition">
+          📂 載入 JSON
+          <input type="file" id="jsonFileInput" accept=".json" class="hidden" onchange="handleJsonUpload(event)" />
+        </label>
+        <button onclick="exportSelectedToMarkdown()" class="px-3 py-1.5 rounded text-xs font-medium bg-amber-600 text-white hover:bg-amber-700 transition">
+          📥 匯出已勾選檢討表 (<span id="selectedCountBadge">0</span>)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================
+       分頁 1：設計法規導航主介面 (含縣市切換、D1~D5、官方圖例與內嵌抽屜)
+       ========================================================= -->
+  <main id="view-navigator" class="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- 左側篩選控制欄 (4 欄寬) -->
+    <aside class="lg:col-span-4 space-y-5">
+
+      <!-- 新增功能 1：基地所在縣市切換 (雙北、桃竹地方自治條例連動) -->
+      <div class="bg-white p-4 rounded-lg border cute-border shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <label class="text-sm font-bold cute-green-text flex items-center gap-1.5">
+            📍 第一步：選擇設計基地所在縣市
+          </label>
+          <span class="text-[11px] bg-amber-50 text-amber-800 px-2 py-0.5 rounded border border-amber-200">自動連動自治條例</span>
+        </div>
+        <select id="cityFilter" onchange="applyFilters()" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-stone-50 focus:outline-none focus:ring-2 focus:ring-emerald-700 font-medium">
+          <option value="ALL">🇹🇼 全國通用（中央母法＋建技＋無障礙＋綠建築）</option>
+          <option value="TPE">🏙️ 臺北市（連動：夾層挑空規則、現有巷道、畸零地、建管自治條例）</option>
+          <option value="NTP">🌉 新北市（連動：騎樓留設要點、畸零地使用規則、都設審議原則）</option>
+          <option value="TYN">✈️ 桃園市（連動：建築管理自治條例、畸零地使用、綠建築自治條例）</option>
+          <option value="HSZ">🔬 新竹縣市（連動：湖口王爺壟都設要點、竹市建管與畸零地自治條例）</option>
+        </select>
+        <p id="cityHintText" class="text-xs text-gray-500 mt-2 leading-relaxed">
+          目前顯示：中央核心法規。切換為「臺北市 / 新北市 / 桃園市 / 新竹縣市」將自動置頂該縣市之騎樓、現有巷道、畸零地與挑空自治條例。
+        </p>
+      </div>
+
+      <!-- 建築物使用類組篩選 -->
+      <div class="bg-white p-4 rounded-lg border cute-border shadow-sm">
+        <label class="text-sm font-bold cute-green-text block mb-2">🏢 第二步：設計題目使用類組</label>
+        <div class="grid grid-cols-3 gap-1.5 text-xs" id="occupancyButtons">
+          <button onclick="setOccupancy('ALL')" data-occ="ALL" class="occ-btn py-1.5 px-2 rounded border font-medium cute-green text-white">全部類組</button>
+          <button onclick="setOccupancy('H2')" data-occ="H2" class="occ-btn py-1.5 px-2 rounded border bg-stone-50 hover:bg-stone-100">H-2 集合住宅</button>
+          <button onclick="setOccupancy('A')" data-occ="A" class="occ-btn py-1.5 px-2 rounded border bg-stone-50 hover:bg-stone-100">A 類 公共集會</button>
+          <button onclick="setOccupancy('B')" data-occ="B" class="occ-btn py-1.5 px-2 rounded border bg-stone-50 hover:bg-stone-100">B 類 商業商場</button>
+          <button onclick="setOccupancy('D')" data-occ="D" class="occ-btn py-1.5 px-2 rounded border bg-stone-50 hover:bg-stone-100">D 類 休閒文教</button>
+          <button onclick="setOccupancy('G')" data-occ="G" class="occ-btn py-1.5 px-2 rounded border bg-stone-50 hover:bg-stone-100">G 類 辦公廳舍</button>
+        </div>
+      </div>
+
+      <!-- 模式 A：依設計階段 D1~D5 篩選 -->
+      <div class="bg-white p-4 rounded-lg border cute-border shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <label class="text-sm font-bold cute-green-text">🗂️ 模式 A：依設計課作業階段 (D1~D5)</label>
+          <button onclick="setStage('ALL')" class="text-xs text-emerald-700 hover:underline">顯示全部</button>
+        </div>
+        <div class="space-y-1.5 text-xs" id="stageButtons">
+          <button onclick="setStage('ALL')" data-stage="ALL" class="stage-btn w-full text-left px-3 py-2 rounded border font-medium cute-green text-white flex justify-between items-center">
+            <span>全部設計階段 (D1 ~ D5)</span>
+            <span class="text-[11px] opacity-80">全流程</span>
+          </button>
+          <button onclick="setStage('D1')" data-stage="D1" class="stage-btn w-full text-left px-3 py-2 rounded border bg-stone-50 hover:bg-stone-100 flex justify-between items-center">
+            <span><strong>D1 基地與外部條件</strong>（建築線/騎樓/畸零地/退縮）</span>
+            <span class="badge-count px-1.5 py-0.5 bg-stone-200 rounded text-[10px]">D1</span>
+          </button>
+          <button onclick="setStage('D2')" data-stage="D2" class="stage-btn w-full text-left px-3 py-2 rounded border bg-stone-50 hover:bg-stone-100 flex justify-between items-center">
+            <span><strong>D2 量體與面積試算</strong>（建蔽容積/免計/高度削線/挑空）</span>
+            <span class="badge-count px-1.5 py-0.5 bg-stone-200 rounded text-[10px]">D2</span>
+          </button>
+          <button onclick="setStage('D3')" data-stage="D3" class="stage-btn w-full text-left px-3 py-2 rounded border bg-stone-50 hover:bg-stone-100 flex justify-between items-center">
+            <span><strong>D3 平面配置與動線</strong>（採光/走廊/樓梯步行距離/車道）</span>
+            <span class="badge-count px-1.5 py-0.5 bg-stone-200 rounded text-[10px]">D3</span>
+          </button>
+          <button onclick="setStage('D4')" data-stage="D4" class="stage-btn w-full text-left px-3 py-2 rounded border bg-stone-50 hover:bg-stone-100 flex justify-between items-center">
+            <span><strong>D4 立面、防火與構造</strong>（防火區劃/外牆開口/陽台雨遮）</span>
+            <span class="badge-count px-1.5 py-0.5 bg-stone-200 rounded text-[10px]">D4</span>
+          </button>
+          <button onclick="setStage('D5')" data-stage="D5" class="stage-btn w-full text-left px-3 py-2 rounded border bg-stone-50 hover:bg-stone-100 flex justify-between items-center">
+            <span><strong>D5 綠建築、無障礙與淨零</strong>（光電/保水滯洪/無障礙圖解）</span>
+            <span class="badge-count px-1.5 py-0.5 bg-stone-200 rounded text-[10px]">D5</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 模式 B：依空間部位／建築元件篩選 -->
+      <div class="bg-white p-4 rounded-lg border cute-border shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <label class="text-sm font-bold cute-green-text">🧩 模式 B：依空間部位／圖塊元件</label>
+          <button onclick="setComponent('ALL')" class="text-xs text-emerald-700 hover:underline">重置標籤</button>
+        </div>
+        <div class="flex flex-wrap gap-1.5 text-xs" id="componentTags">
+          <!-- 由 JS 動態產生 -->
+        </div>
+      </div>
+
+      <!-- 新增功能 2：openlawtw 視覺圖例與分章閱讀器快速入口 -->
+      <div class="bg-emerald-900 text-white p-4 rounded-lg shadow-sm space-y-2.5">
+        <div class="text-xs font-bold tracking-wider uppercase text-emerald-200">📚 openlawtw 獨家視覺資產直連</div>
+        <p class="text-xs text-emerald-100 leading-relaxed">
+          直接開啟已處理完成之《建築技術規則》24 條官方圖例、171 張語義表格與《無障礙設計規範》139 張高解析度 WebP 尺寸圖：
+        </p>
+        <div class="grid grid-cols-1 gap-1.5 pt-1">
+          <button onclick="filterOnlyVisuals()" class="w-full text-left px-3 py-2 rounded bg-emerald-800 hover:bg-emerald-700 text-xs font-medium flex items-center justify-between">
+            <span>🖼️ 只顯示含「官方圖例／規範裁圖／表格」條文</span>
+            <span class="bg-amber-400 text-emerald-950 px-1.5 py-0.5 rounded font-bold text-[10px]">推薦</span>
+          </button>
+          <a href="https://openlawtw.vercel.app/laws/%E5%85%A7%E6%94%BF%E9%83%A8-GL000734.html" target="_blank" class="w-full px-3 py-2 rounded bg-white/10 hover:bg-white/20 text-xs flex items-center justify-between">
+            <span>♿ 開啟《無障礙設施設計規範》10 章 139 圖閱讀器</span>
+            <span>↗</span>
+          </a>
+          <a href="https://openlawtw.vercel.app/laws/D0070115.html" target="_blank" class="w-full px-3 py-2 rounded bg-white/10 hover:bg-white/20 text-xs flex items-center justify-between">
+            <span>📘 開啟《建築技術規則設計施工編》全文與圖表</span>
+            <span>↗</span>
+          </a>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- 右側主顯示區 (8 欄寬) -->
+    <section class="lg:col-span-8 space-y-4">
+
+      <!-- 模式 C：設計白話文搜尋與常見設計痛點快捷提問 -->
+      <div class="bg-white p-4 rounded-lg border cute-border shadow-sm space-y-3">
+        <div class="flex flex-col sm:flex-row gap-2">
+          <div class="relative flex-1">
+            <input
+              type="text"
+              id="searchInput"
+              oninput="applyFilters()"
+              placeholder="輸入設計問題或關鍵字（例：免計容積、車道坡度、安全梯步行距離、太陽能、湖口、挑空...）"
+              class="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-700"
+            />
+            <span class="absolute left-3 top-2.5 text-gray-400">🔎</span>
+          </div>
+          <button onclick="resetAllFilters()" class="px-4 py-2 text-xs font-medium border border-gray-300 rounded-md hover:bg-stone-100 text-gray-600">
+            清除篩選
+          </button>
+        </div>
+
+        <!-- 學生高頻白話文提問膠囊 -->
+        <div class="flex items-center gap-1.5 flex-wrap text-xs">
+          <span class="text-gray-500 font-medium">💡 學生常問：</span>
+          <button onclick="quickSearch('梯廳機電免計容積 15%')" class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100">梯廳/機電免計容積上限？</button>
+          <button onclick="quickSearch('屋頂突出物 1/8')" class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100">屋突面積怎樣算不計樓層？</button>
+          <button onclick="quickSearch('直通樓梯 步行距離')" class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100">到樓梯步行距離幾公尺？</button>
+          <button onclick="quickSearch('車道 坡度 5.5')" class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100">地下室車道寬度與坡度？</button>
+          <button onclick="quickSearch('無障礙坡道 1/12')" class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100">無障礙坡道與扶手尺寸？</button>
+          <button onclick="quickSearch('太陽光電 1000')" class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100">新建物屋頂光電要裝多少？</button>
+          <button onclick="quickSearch('夾層 挑空')" class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100">夾層與挑空限制？</button>
+        </div>
+      </div>
+
+      <!-- 篩選狀態列 -->
+      <div class="flex items-center justify-between text-xs text-gray-600 px-1">
+        <div>
+          共找到 <strong id="resultCount" class="text-emerald-800 text-sm">0</strong> 條設計課關鍵法規
+          <span id="visualFilterIndicator" class="hidden ml-2 bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded font-medium">🖼️ 僅顯示含官方圖例/表格條文</span>
+        </div>
+        <div class="text-gray-400">點擊「📖 側邊抽屜預覽」可免跳頁直接檢視 openlawtw 條文與圖表</div>
+      </div>
+
+      <!-- 法規卡片列表容器 -->
+      <div id="lawCardsContainer" class="space-y-3.5"></div>
+
+    </section>
+  </main>
+
+  <!-- =========================================================
+       分頁 2：建築設計快算小工具 (免計容積 / 屋突 / 無障礙坡道 / 樓梯級高級深)
+       ========================================================= -->
+  <section id="view-calculator" class="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 flex-1 hidden">
+    <div class="bg-white p-6 rounded-lg border cute-border shadow-sm mb-6">
+      <h2 class="text-lg font-bold serif-title cute-green-text mb-1">📐 建築設計課程法規快算器（對齊《建築技術規則》第 1、33、95、162 條與《無障礙設計規範》）</h2>
+      <p class="text-xs text-gray-500">供大二至大四設計課草模與面積表階段快速試算上限值，計算結果可直接複製貼入建築計畫書。</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- 快算 1：建蔽率、容積率、免計容積與屋突 1/8 上限 -->
+      <div class="bg-white p-5 rounded-lg border cute-border shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b pb-2">
+          <h3 class="font-bold text-gray-800">1. 基地面積、免計容積 (§162) 與屋突 (§1) 試算</h3>
+          <span class="text-xs bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded">建技 §1、§162</span>
+        </div>
+        <div class="grid grid-cols-3 gap-3 text-xs">
+          <div>
+            <label class="block text-gray-600 mb-1">基地面積 (m²)</label>
+            <input type="number" id="calcSiteArea" value="1200" oninput="runCalculators()" class="w-full border rounded px-2.5 py-1.5" />
+          </div>
+          <div>
+            <label class="block text-gray-600 mb-1">法定建蔽率 (%)</label>
+            <input type="number" id="calcBCR" value="45" oninput="runCalculators()" class="w-full border rounded px-2.5 py-1.5" />
+          </div>
+          <div>
+            <label class="block text-gray-600 mb-1">法定容積率 (%)</label>
+            <input type="number" id="calcFAR" value="240" oninput="runCalculators()" class="w-full border rounded px-2.5 py-1.5" />
+          </div>
+        </div>
+        <div id="calcAreaOutput" class="bg-stone-50 p-3.5 rounded border text-xs space-y-1.5 leading-relaxed"></div>
+      </div>
+
+      <!-- 快算 2：無障礙坡道長度、高差與平台檢核 (GL000734 第2章) -->
+      <div class="bg-white p-5 rounded-lg border cute-border shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b pb-2">
+          <h3 class="font-bold text-gray-800">2. 無障礙坡道斜率、長度與平台試算 (圖 203.2.6)</h3>
+          <span class="text-xs bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded">無障礙規範 第2章</span>
+        </div>
+        <div class="grid grid-cols-2 gap-3 text-xs">
+          <div>
+            <label class="block text-gray-600 mb-1">室內外設計高差 H (cm)</label>
+            <input type="number" id="calcRampHeight" value="75" oninput="runCalculators()" class="w-full border rounded px-2.5 py-1.5" />
+          </div>
+          <div>
+            <label class="block text-gray-600 mb-1">採用斜率 (預設 1/12)</label>
+            <select id="calcRampSlope" onchange="runCalculators()" class="w-full border rounded px-2.5 py-1.5 bg-white">
+              <option value="12">1/12（一般標準上限，高差 ≤ 75cm）</option>
+              <option value="10">1/10（既有建築改善或高差 ≤ 20cm）</option>
+              <option value="15">1/15（建議舒適斜率）</option>
+            </select>
+          </div>
+        </div>
+        <div id="calcRampOutput" class="bg-stone-50 p-3.5 rounded border text-xs space-y-1.5 leading-relaxed"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       分頁 3：openlawtw-main 本機 Python 轉檔腳本 (Ver.02 含地方條例與圖例)
+       ========================================================= -->
+  <section id="view-pipeline" class="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 flex-1 hidden">
+    <div class="bg-white p-6 rounded-lg border cute-border shadow-sm space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold serif-title cute-green-text">🐍 openlawtw-main 轉檔管線腳本 Ver.02（新增雙北桃竹自治條例 × 建技 24 條圖例映射）</h2>
+          <p class="text-xs text-gray-500 mt-1">
+            將此腳本存於您的 <code>openlawtw-main/scripts/export_cute_design_course.py</code> 並執行，即可讀取 <code>public/data/laws.json</code> 與 <code>data/documents/article-figures/catalog.json</code>，產出完整 JSON。
+          </p>
+        </div>
+        <button onclick="copyPythonScript()" class="px-4 py-2 rounded text-xs font-bold cute-green text-white hover:opacity-90">
+          📋 複製完整 Python 腳本
+        </button>
+      </div>
+      <pre id="pythonScriptCode" class="bg-slate-900 text-slate-100 p-4 rounded-lg text-xs overflow-x-auto leading-relaxed"><code># 請直接執行：python3 scripts/export_cute_design_course.py
+# 自動整合：
+# 1. 中央建築設計核心法規 + 綠建築 6 大規範 (NLMA) + 無障礙設計規範 (GL000734)
+# 2. 臺北市 (TPE)、新北市 (NTP)、桃園市 (TYN)、新竹縣市 (HSZ) 地方建管/畸零地/挑空/都設自治條例
+# 3. 建築技術規則設計施工編 (D0070115) 24 個條號之官方圖例 (article-figures/catalog.json) 與 171 張語義表格標記</code></pre>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       新增功能 3：右側滑出抽屜 (Drawer) — 免跳頁內嵌預覽 openlawtw 原文、圖例與 embed.html
+       ========================================================= -->
+  <div id="lawDrawerBackdrop" onclick="closeDrawer()" class="fixed inset-0 bg-black/40 z-40 hidden"></div>
+  <aside id="lawDrawer" class="fixed top-0 right-0 h-full w-full max-w-2xl bg-white z-50 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
+    <div class="p-4 cute-green text-white flex items-center justify-between">
+      <div>
+        <div id="drawerBadge" class="text-[11px] text-emerald-200">openlawtw 條文與圖例檢視器</div>
+        <h3 id="drawerTitle" class="font-bold text-base">條文標題</h3>
+      </div>
+      <div class="flex items-center gap-2">
+        <a id="drawerExternalLink" href="#" target="_blank" class="px-2.5 py-1 rounded bg-white/15 hover:bg-white/25 text-xs">
+          在新分頁開啟 openlawtw ↗
+        </a>
+        <button onclick="closeDrawer()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-lg">✕</button>
+      </div>
+    </div>
+
+    <!-- 抽屜內容區：包含設計檢核重點、官方圖例提示與內嵌 openlawtw 網頁 -->
+    <div class="p-4 bg-stone-50 border-b text-xs space-y-2">
+      <div class="font-bold text-amber-900 bg-amber-50 border border-amber-200 p-2.5 rounded" id="drawerMetrics"></div>
+      <div id="drawerVisualAlert" class="hidden bg-emerald-50 border border-emerald-200 text-emerald-900 p-2.5 rounded flex items-center justify-between">
+        <span id="drawerVisualText">🖼️ 本條於 openlawtw 內建官方圖例／結構化表格／無障礙規範 WebP 裁圖</span>
+        <a id="drawerVisualBtn" href="#" target="_blank" class="px-2.5 py-1 bg-emerald-700 text-white rounded font-medium hover:bg-emerald-800">直接查看圖表 ↗</a>
+      </div>
+    </div>
+
+    <div class="flex-1 relative bg-white">
+      <iframe id="drawerIframe" src="about:blank" class="w-full h-full border-0" title="openlawtw 條文預覽"></iframe>
+    </div>
+  </aside>
+
+  <script>
+    // =========================================================================
+    // 內建核心資料庫 Ver.02：
+    // 涵蓋中央母法 + 建技 24 條官方圖例代表條文 + 無障礙 WebP 裁圖 + 雙北桃竹地方自治條例
+    // =========================================================================
+    let LAW_DATA = [
+      // --- D1 基地與外部條件（含建技 §1 官方圖例 & 雙北桃竹地方自治條例） ---
+      {
+        id: "D0070115-a-1",
+        lawId: "D0070115",
+        lawName: "建築技術規則建築設計施工編",
+        articleNo: "第 1 條",
+        anchor: "a-1",
+        city: "ALL",
+        stages: ["D1", "D2"],
+        components: ["#建築線與通路", "#高度與削線屋突", "#居室採光通風"],
+        occupancy: ["ALL"],
+        hasOfficialFigure: true,
+        figureNote: "內建內政部官方補充圖例 JPG（一宗土地、基地深度寬度、建築物高度、屋頂突出物 1/8、夾層、居室等 40+ 款圖解）",
+        hasOfficialTable: false,
+        title: "建技設計施工編 §1｜建築設計核心用語定義與圖解（屋突/夾層/基地/高度）",
+        question: "屋頂突出物怎樣算不計入建築物高度與樓層數？夾層面積上限是多少？",
+        metrics: "屋突高 ≤ 6m（有昇降機設備 ≤ 9m）且水平投影面積之和 ≤ 建築面積 1/8（18m² 內不受 1/8 限制）｜夾層 ≤ 1/3 或 100m²",
+        summary: "設計課必背第 1 條！本條在 openlawtw (v0.25.4) 已收錄完整內政部官方圖例（JPG），直接圖解基地界線、面前道路、地板面高度與屋突算法。",
+        excerpt: "一、一宗土地：本法第十一條所稱一宗土地，指一幢或二幢以上有連帶使用性之建築物所使用之建築基地。\n九、建築物高度：自基地地面計量至建築物最高部分之垂直高度。但屋頂突出物或女兒牆之高度在規定限度內者，不計入建築物高度。\n十、屋頂突出物：突出於屋面之附屬建築物及雜項工作物：…（一）高度在六公尺以內或有昇降機設備通達屋頂之屋頂突出物高度在九公尺以內，且屋頂突出物水平投影面積之和，除高層建築物以不超過建築面積百分之十五外，其餘以不超過建築面積八分之一為限，其未達十八平方公尺，得建築十八平方公尺。\n十八、夾層：夾於樓地板與天花板間之樓層；同一樓層內夾層面積之和，超過該層樓地板面積三分之一或一百平方公尺者，視為另一樓層。"
+      },
+      {
+        id: "D0070115-a-2",
+        lawId: "D0070115",
+        lawName: "建築技術規則建築設計施工編",
+        articleNo: "第 2 條",
+        anchor: "a-2",
+        city: "ALL",
+        stages: ["D1"],
+        components: ["#建築線與通路"],
+        occupancy: ["ALL"],
+        hasOfficialFigure: true,
+        figureNote: "內建私設通路長度、寬度與迴車道官方圖例",
+        hasOfficialTable: false,
+        title: "建技設計施工編 §2｜基地私設通路寬度與迴車道設置標準",
+        question: "基地沒直接臨接計畫道路，私設通路要留多寬？什麼時候要設汽車迴車道？",
+        metrics: "長度 <10m 寬 2m；10~20m 寬 3m；>20m 寬 5m；總樓地板 ≥ 1,000m² 寬 6m｜單向出口 >35m 須設迴車道",
+        summary: "基地分析（D1）檢查出入動線與消防救災通路的首要條文，含官方迴車道尺寸圖解。",
+        excerpt: "基地應與建築線相連接，其連接部分之最小長度應在二公尺以上。基地內私設通路之寬度不得小於左列標準：\n一、長度未滿十公尺者為二公尺。\n二、長度在十公尺以上未滿二十公尺者為三公尺。\n三、長度在二十公尺以上者為五公尺。\n四、基地內以私設通路為唯一之連外通路，且該通路所服務之建築物總樓地板面積合計在一千平方公尺以上者，其寬度為六公尺。"
+      },
+      {
+        id: "D0070001-a-17",
+        lawId: "D0070001",
+        lawName: "都市計畫法",
+        articleNo: "第 17 條",
+        anchor: "a-17",
+        city: "ALL",
+        stages: ["D1"],
+        components: ["#建築線與通路"],
+        occupancy: ["ALL"],
+        hasOfficialFigure: false,
+        hasOfficialTable: false,
+        title: "都市計畫法 §17｜未發布細部計畫地區之限建與指定建築線但書",
+        question: "基地只有主要計畫、還沒發布細部計畫，可以申請指定建築線與建照嗎？",
+        metrics: "未發布細部計畫原則限建｜但主要計畫發布逾 2 年，能確定建築線或主要公設已興建完成者得核發建照",
+        summary: "與建築系「建築基地禁限建法規檢討表 (SYSTEM 01)」直接連動之首條檢核依據。",
+        excerpt: "未發布細部計畫地區，應限制其建築使用及變更地形。但主要計畫發布已逾二年以上，而能確定建築線或主要公共設施已照主要計畫興建完成者，得依有關建築法令之規定，由主管建築機關指定建築線，核發建築執照。"
+      },
+
+      // --- 雙北、桃竹地方自治條例（切換縣市時自動高亮） ---
+      {
+        id: "TPE-MEZZANINE-a-4",
+        lawId: "D0070115",
+        lawName: "臺北市建築物樓層高度及夾層挑空設計管理規則",
+        articleNo: "第 4、5 條（北市自治規則）",
+        anchor: "a-164-1",
+        city: "TPE",
+        stages: ["D1", "D2"],
+        components: ["#高度與削線屋突", "#建蔽與容積"],
+        occupancy: ["H2", "G", "B"],
+        hasOfficialFigure: false,
+        hasOfficialTable: false,
+        title: "【臺北市專用】樓層高度、夾層與挑空設計管理規則（北市基地必查）",
+        question: "基地在臺北市（如文山區、信義區），住宅跟非住宅的樓層高度與挑空有什麼特殊限制？",
+        metrics: "住宅首層 ≤ 4.2m、其餘 ≤ 3.6m｜挑空部分合計面積 ≤ 該層樓地板面積 1/10（且不得小於 15m²）",
+        summary: "中國科大台北校區學生選取臺北市基地時，除了中央建技 §164-1 外，必須額外符合北市更嚴格之挑空比例與層高限制。",
+        excerpt: "臺北市政府為防止假藉挑空或超高樓層違規二次施工增建夾層，特訂定本管理規則。集合住宅除地面層外，各樓層高度不得超過三點六公尺；挑空樓層高度不得超過六公尺，且挑空面積比例受嚴格管控。"
+      },
+      {
+        id: "TPE-ALLEY-a-1",
+        lawId: "D0070109",
+        lawName: "臺北市面臨現有巷道申請建築原則 / 建築管理自治條例",
+        articleNo: "現有巷道退縮規定（北市）",
+        anchor: "a-48",
+        city: "TPE",
+        stages: ["D1"],
+        components: ["#建築線與通路", "#騎樓與退縮"],
+        occupancy: ["ALL"],
+        hasOfficialFigure: false,
+        hasOfficialTable: false,
+        title: "【臺北市專用】面臨現有巷道申請建築之寬度、退縮與高度比檢討",
+        question: "基地在臺北市舊市區，只臨接未滿 8 公尺的現有巷道，要怎麼退縮？",
+        metrics: "現有巷道未達 4m~8m 依規定退縮建築｜退縮部分計入法定空地，並依退縮後寬度檢討建築物高度比",
+        summary: "openlawtw 臺北市 47 部地方自治法規重點：處理文山區、萬華區、大安區巷弄基地建築線指定之關鍵。",
+        excerpt: "基地面臨現有巷道申請建築，應依臺北市建築管理自治條例及面臨現有巷道申請建築原則辦理退縮，以確保消防救災及通行安全。"
+      },
+      {
+        id: "NTP-ARCADE-a-3",
+        lawId: "D0070109",
+        lawName: "新北市騎樓及無遮簷人行道設置標準 / 畸零地使用規則",
+        articleNo: "騎樓留設標準（新北）",
+        anchor: "a-43",
+        city: "NTP",
+        stages: ["D1"],
+        components: ["#騎樓與退縮"],
+        occupancy: ["ALL"],
+        hasOfficialFigure: false,
+        hasOfficialTable: true,
+        title: "【新北市專用】騎樓與無遮簷人行道留設寬度（3.9m / 3.5m）及高程標準",
+        question: "基地在新北市（如新店、板橋、三重）商業區或住宅區，騎樓或人行道要留多寬？",
+        metrics: "面臨 7m 以上計畫道路之商業區原則留設 3.9m 騎樓或無遮簷人行道｜淨高 ≥ 3.0m、坡度 1/40 順平道路",
+        summary: "openlawtw 新北市 61 部地方自治法規重點：基地分析（D1）決定一樓外牆退縮線與構造柱位置之依據。",
+        excerpt: "凡本市都市計畫範圍內商業區、市場用地及指定應留設騎樓地區，面臨寬度七公尺以上計畫道路之建築基地，應一律留設騎樓或無遮簷人行道。"
+      },
+      {
+        id: "TYN-GREEN-a-1",
+        lawId: "D0070109",
+        lawName: "桃園市建築管理自治條例 / 發展低碳綠色城市自治條例",
+        articleNo: "建築線、騎樓與綠能規定（桃園）",
+        anchor: "a-1",
+        city: "TYN",
+        stages: ["D1", "D5"],
+        components: ["#騎樓與退縮", "#綠建築與微氣候"],
+        occupancy: ["ALL"],
+        hasOfficialFigure: false,
+        hasOfficialTable: false,
+        title: "【桃園市專用】桃園市建築管理自治條例、畸零地最小寬深與綠能屋頂要求",
+        question: "基地在桃園市，畸零地最小寬度深度是多少？用電大戶或新建建築有什麼低碳規定？",
+        metrics: "依分區甲乙種建築用地及住宅區、商業區檢核最小寬度（3.0m~4.5m）與最小深度（12m~15m）",
+        summary: "openlawtw 桃園市 42 部地方自治法規重點：涵蓋桃園航空城、重劃區與舊市區設計基地之地方管制。",
+        excerpt: "桃園市建築基地未達最小面積之寬度及深度規定者，屬畸零地，非與鄰接土地協議調整地形或合併使用，不得建築。"
+      },
+      {
+        id: "HSZ-HUKOU-a-1",
+        lawId: "D0070001",
+        lawName: "新竹縣湖口（王爺壟地區）都市設計管制要點 / 新竹縣市建管自治條例",
+        articleNo: "退縮、綠化與街角廣場（竹縣市）",
+        anchor: "a-22",
+        city: "HSZ",
+        stages: ["D1", "D5"],
+        components: ["#騎樓與退縮", "#綠建築與微氣候"],
+        occupancy: ["ALL"],
+        hasOfficialFigure: false,
+        hasOfficialTable: true,
+        title: "【新竹縣市專用】湖口（王爺壟）都市設計管制要點＆竹縣市畸零地／建管條例",
+        question: "中國科大新竹校區（湖口）周邊或竹北、新竹市基地，帶狀開放空間退縮與植栽喬木怎麼規定？",
+        metrics: "臨主要道路退縮 4m~6m 無遮簷人行道（含 1.5m~2.5m 植栽帶）｜街角基地應留設街角廣場｜垃圾儲藏與冷氣機遮蔽",
+        summary: "openlawtw 新竹縣（16 部）＋新竹市（21 部）地方自治法規重點，直接支援新竹校區周邊基地設計課！",
+        excerpt: "為塑造新竹縣湖口地區優質都市景觀，建築基地臨接計畫道路應留設退縮帶狀公共開放空間，並配置喬木植栽帶及無障礙通行動線。"
+      },
+
+      // --- D2 量體與面積試算（含建技官方圖例與表格） ---
+      {
+        id: "D0070115-a-162",
+        lawId: "D0070115",
+        lawName: "建築技術規則建築設計施工編",
+        articleNo: "第 162 條",
+        anchor: "a-162",
+        city: "ALL",
+        stages: ["D2"],
+        components: ["#建蔽與容積"],
+        occupancy: ["ALL"],
+        hasOfficialFigure: false,
+        hasOfficialTable: false,
+        title: "建技設計施工編 §162｜免計容積項目總整理（梯廳 15%、機電與管委會 15%）",
+        question: "哪些空間可以「免計容積（不計入容積總樓地板面積）」？梯廳跟機電空間上限各是多少？",
+        metrics: "每層陽台＋梯廳 ≤ 該層 15%（單計梯廳 ≤ 10%）｜機電設備＋安全梯梯間＋管委會空間合計 ≤ 容積總樓地板 15%",
+        summary: "大二到大四做面積表（GFA）必查！也是 AI 建築配置系統檢查超配容積的法源核心。",
+        excerpt: "前條容積總樓地板面積依本編第一條第五款、第七款及下列規定計算之：\n一、每層陽臺面積與梯廳面積之和，不超過該層樓地板面積百分之十五部分，得不計入該層樓地板面積；每層梯廳面積不超過該層樓地板面積百分之十部分，得不計入。\n二、機電設備空間、安全梯之梯間、緊急昇降機之機道、特別安全梯與緊急昇降機之排煙室及管理委員會使用空間面積之和，除依規定僅須設置一座直通樓梯之建築物不得超過都市計畫法規或非都市土地使用管制規則規定該基地容積之百分之十外，其餘不得超過該基地容積之百分之十五。"
+      },
+      {
+        id: "D0070115-a-23",
+        lawId: "D0070115",
+        lawName: "建築技術規則建築設計施工編",
+        articleNo: "第 23、164 條",
+        anchor: "a-23",
+        city: "ALL",
+        stages: ["D2"],
+        components: ["#高度與削線屋突", "#居室採光通風"],
+        occupancy: ["ALL", "H2"],
+        hasOfficialFigure: true,
+        figureNote: "內建第 23、24、164 條面前道路高度比與 3.6:1 削線投影官方圖例",
+        hasOfficialTable: false,
+        title: "建技設計施工編 §23 & §164｜建築物高度比（1:1.5 / 3.6:1 削線）與冬至日照",
+        question: "量體可以蓋多高？為什麼高樓層要往內退縮（削線）？住宅冬至日照要幾小時？",
+        metrics: "非容積管制區高度 ≤ 面前道路寬 × 1.5 + 6m｜容積管制區陰影不得超過對側道路境界線（約 3.6:1 斜率）｜冬至日有效日照 ≥ 1 小時",
+        summary: "決定建築量體剖面退縮造型的核心條文，openlawtw 內建官方幾何剖面圖例。",
+        excerpt: "住宅區建築物之高度不得超過二十一公尺及七層樓。但合於左列規定之一者，不在此限… 建築物以該建築物各該部分至面前道路對側境界線之水平距離一點五倍加六公尺為限。容積管制地區依第 164 條檢討陰影面積。"
+      },
+
+      // --- D3 平面配置與動線（含建技 §92 表格、§33 樓梯、車道與無障礙 139 圖） ---
+      {
+        id: "D0070115-a-92",
+        lawId: "D0070115",
+        lawName: "建築技術規則建築設計施工編",
+        articleNo: "第 92 條",
+        anchor: "a-92",
+        city: "ALL",
+        stages: ["D3"],
+        components: ["#樓梯與步行距離"],
+        occupancy: ["ALL", "A", "B", "D", "G", "H2"],
+        hasOfficialFigure: false,
+        hasOfficialTable: true,
+        title: "建技設計施工編 §92｜走廊淨寬度標準表（兩側居室 vs 單側居室）",
+        question: "平面圖走廊要畫多寬才合法？學校教室、辦公室跟住宅的走廊寬度差多少？",
+        metrics: "學校/醫院：雙側居室 ≥ 2.4m、單側 ≥ 1.8m｜一般居室 >200m²：雙側 ≥ 1.6m、單側 ≥ 1.2m｜其他 ≥ 1.2m",
+        summary: "openlawtw (v0.25.4) 已將本條原本難讀的 ASCII 框線表轉換為結構化 HTML 表格，對應 SYSTEM 02「通道規定檢核」。",
+        excerpt: "走廊之設置應依左列規定：走廊寬度依建築物用途及該層居室樓地板面積合計決定：\n1. 國小、國中、高中教室及醫院病房：兩側有居室者 ≥ 2.4公尺，其他走廊 ≥ 1.8公尺。\n2. 同一樓層內之居室樓地板面積在200平方公尺以上（地下層100平方公尺以上）：兩側有居室者 ≥ 1.6公尺，其他走廊 ≥ 1.2公尺。\n3. 其他居室：≥ 1.2公尺。"
+      },
+      {
+        id: "D0070115-a-93",
+        lawId: "D0070115",
+        lawName: "建築技術規則建築設計施工編",
+        articleNo: "第 93、95、96 條",
+        anchor: "a-93",
+        city: "ALL",
+        stages: ["D3"],
+        components: ["#樓梯與步行距離"],
+        occupancy: ["ALL", "A", "B", "D", "G", "H2"],
+        hasOfficialFigure: false,
+        hasOfficialTable: false,
+        title: "建技設計施工編 §93~§96｜二座直通樓梯設置門檻、步行距離（30~50m）與安全梯",
+        question: "什麼時候平面必須畫「兩座直通樓梯」？居室最遠角落走到樓梯不能超過幾公尺？",
+        metrics: "步行距離：一般 30m~50m（高層建築 ≤ 40m、無窗居室 ≤ 30m）｜第 6~14 層須改為室內/戶外安全梯，15 層以上或地下 3 層以下須為特別安全梯",
+        summary: "平面配置服務核（Core）位置最關鍵的防災法規！也是評圖時老師一定會拿比例尺量的地方。",
+        excerpt: "直通樓梯之設置應依左列規定：任何樓層自居室任一點至直通樓梯之步行距離不得超過規定（依構造及用途為 30、40 或 50 公尺）。六層以上未達十五層之建築物應設置安全梯；十五層以上或地下三層以下應設置特別安全梯（附設排煙室）。"
+      },
+      {
+        id: "D0070115-a-33",
+        lawId: "D0070115",
+        lawName: "建築技術規則建築設計施工編",
+        articleNo: "第 33 條",
+        anchor: "a-33",
+        city: "ALL",
+        stages: ["D3"],
+        components: ["#樓梯與步行距離"],
+        occupancy: ["ALL", "D", "H2"],
+        hasOfficialFigure: true,
+        figureNote: "內建第 33 條樓梯級高級深、轉折平台與淨高量測官方圖例與 HTML 表格",
+        hasOfficialTable: true,
+        title: "建技設計施工編 §33｜樓梯寬度、級高（R）與級深（T）四大類標準表",
+        question: "樓梯踏步的級高（R）、級深（T）跟梯寬要怎麼設計？學校、商場跟住宅內梯差在哪？",
+        metrics: "第一類(小學)：寬 ≥1.4m、級高 ≤16cm、級深 ≥26cm｜第二類(學校/商場)：寬 ≥1.2m、級高 ≤18cm、級深 ≥24cm｜第三類(集合住宅共用)：寬 ≥1.2m、級高 ≤20cm、級深 ≥21cm",
+        summary: "openlawtw 同時收錄本條之語義表格與內政部官方踏步量測圖例，可搭配上方「設計快算器」自動算出總階數。",
+        excerpt: "樓梯及平臺之寬度、樓梯之級高及級深，應依左列規定（分四類場所表列）；級高超過十八公分，且樓梯高度超過三公尺者，每三公尺以內應設置平臺；超過十八公分以下者，每四公尺以內應設置平臺。"
+      },
+      {
+        id: "D0070115-a-60",
+        lawId: "D0070115",
+        lawName: "建築技術規則建築設計施工編",
+        articleNo: "第 60、61 條",
+        anchor: "a-60",
+        city: "ALL",
+        stages: ["D3"],
+        components: ["#地下室與停車車道"],
+        occupancy: ["ALL"],
+        hasOfficialFigure: false,
+        hasOfficialTable: true,
+        title: "建技設計施工編 §60 & §61｜停車位尺寸（2.5×5.5m）、雙車道 5.5m 與坡度 1:6",
+        question: "畫地下室停車場時，汽車位跟車道要畫多大？汽車坡道斜率跟轉彎半徑是多少？",
+        metrics: "標準車位 2.5m × 5.5m（最多 1/5 可設小車位 2.3×5.5m，平行停車 2.0×6.0m）｜雙車道寬 ≥ 5.5m（50輛以下得設 3.5m 單車道）｜坡度 ≤ 1:6，內側曲率半徑 ≥ 5.0m",
+        summary: "大三、大四地下室平面圖必檢核！首波 3 公尺坡道應緩和至 1:10（或設緩衝空間）。",
+        excerpt: "每輛停車位為寬二點五公尺，長五點五公尺。車道之寬度、坡度及曲線半徑應依下列規定：\n一、車道之寬度：單車道寬度應為三點五公尺以上；雙車道寬度應為五點五公尺以上。\n二、車道之坡度不得超過一比六，其表面應用粗糙面或為其他防滑之處理。\n三、車道之內側曲線半徑應為五點零公尺以上。"
+      },
+      {
+        id: "GL000734-ch2",
+        lawId: "內政部-GL000734",
+        lawName: "建築物無障礙設施設計規範",
+        articleNo: "第 2 章～第 5 章（含 139 張官方尺寸圖）",
+        anchor: "ch-2",
+        city: "ALL",
+        stages: ["D3", "D5"],
+        components: ["#無障礙與電梯廁所"],
+        occupancy: ["ALL"],
+        hasOfficialFigure: true,
+        figureNote: "openlawtw 內建 10 章 70 節共 139 張無損 WebP 官方尺寸圖（含圖 203.2.6 坡道、輪椅 150cm 迴轉空間、昇降機、無障礙廁所配置圖）",
+        hasOfficialTable: true,
+        title: "無障礙設計規範｜通路、坡道（1/12）、扶手、昇降機與無障礙廁所 139 張圖解",
+        question: "無障礙坡道、無障礙電梯跟無障礙廁所（150cm 迴轉圓）的標準尺寸圖在哪裡看？",
+        metrics: "室外通路 ≥ 130cm、室內走廊 ≥ 120cm｜坡道淨寬 ≥ 90cm、斜率 ≤ 1/12、每高差 75cm 設 ≥150cm 平台｜廁所內部 ≥ 150cm 直徑迴轉空間",
+        summary: "openlawtw (v0.25.2) 已將整本 105 頁無障礙規範 PDF 拆解為分章閱讀器與 139 張高清 WebP 裁圖，點選「查看圖表」即可直接檢視。",
+        excerpt: "建築物無障礙設施設計規範涵蓋：第2章無障礙通路（室外通路、室內通路走廊、出入口、坡道、扶手）、第3章樓梯、第4章昇降設備、第5章廁所盥洗室、第6章浴室、第7章輪椅觀眾席位、第8章停車空間。"
+      },
+
+      // --- D4 立面、防火與構造 ---
+      {
+        id: "D0070115-a-79",
+        lawId: "D0070115",
+        lawName: "建築技術規則建築設計施工編",
+        articleNo: "第 79、79-2 條",
+        anchor: "a-79",
+        city: "ALL",
+        stages: ["D4"],
+        components: ["#防火區劃與外牆"],
+        occupancy: ["ALL"],
+        hasOfficialFigure: false,
+        hasOfficialTable: false,
+        title: "建技設計施工編 §79 & §79-2｜面積防火區劃（1,500m²）與挑空／電扶梯垂直區劃",
+        question: "每層樓面積多大要切一個「防火區劃」？如果設計有中庭挑空或電扶梯貫穿樓層怎麼辦？",
+        metrics: "防火構造每 1,500m² 應以 1 小時防火時效牆壁及防火門窗區劃（設自動撒水設備得放寬至 3,000m²）｜挑空、樓梯間、昇降機道應作垂直區劃",
+        summary: "大三以上設計有大型中庭挑空、商場或地下室時，評圖必被問的防火鐵捲門與垂直區劃依據。",
+        excerpt: "防火構造建築物總樓地板面積在一千五百平方公尺以上者，應按每一千五百平方公尺，以具有一小時以上防火時效之牆壁、防火門窗等防火設備與該處防火構造之樓地板區劃分隔。挑空部分、電扶梯間、安全梯之樓梯間、昇降機道等豎道部分，應與其他部分形成垂直防火區劃。"
+      },
+      {
+        id: "D0070115-a-110",
+        lawId: "D0070115",
+        lawName: "建築技術規則建築設計施工編",
+        articleNo: "第 45、110 條",
+        anchor: "a-110",
+        city: "ALL",
+        stages: ["D4"],
+        components: ["#防火區劃與外牆", "#居室採光通風"],
+        occupancy: ["ALL"],
+        hasOfficialFigure: true,
+        figureNote: "內建第 110 條鄰地境界線外牆防火間隔（1.5m / 3m / 6m）官方圖例",
+        hasOfficialTable: false,
+        title: "建技設計施工編 §45 & §110｜外牆緊鄰地界線之開口退縮（1.0m）與防火時效（1.5m/3m）",
+        question: "外牆離鄰地境界線多近不能開窗？距離地界線幾公尺內外牆與窗戶要有防火時效？",
+        metrics: "緊接鄰地不得向鄰地開口，但離地界線 ≥ 1.0m（或設遮蔽設施 ≥ 0.5m）不在此限｜距離地界線 < 1.5m 外牆須 1hr 防火；1.5m~3m 須半小時防火",
+        summary: "立面開窗設計（D4）必查！本條在 openlawtw 內建內政部官方圖例（同基地兩幢建物之中心線距離圖解）。",
+        excerpt: "防火構造建築物，除基地鄰接寬度六公尺以上之道路或深度六公尺以上之永久性空地側外，自基地境界線退縮未達一點五公尺之部分，其外牆應具有一小時以上防火時效，其牆上之開口應裝設具同等以上防火時效之防火門窗；退縮在一點五公尺以上未達三公尺部分，應具半小時以上防火時效。"
+      },
+
+      // --- D5 綠建築、無障礙與淨零（光電、保水滯洪、綠建築 6 大規範） ---
+      {
+        id: "D0070319-a-3",
+        lawId: "D0070319",
+        lawName: "建築物設置太陽光電發電設備標準",
+        articleNo: "第 3、4 條",
+        anchor: "a-3",
+        city: "ALL",
+        stages: ["D5"],
+        components: ["#綠建築與微氣候"],
+        occupancy: ["ALL", "A", "B", "D", "G", "H2"],
+        hasOfficialFigure: false,
+        hasOfficialTable: false,
+        title: "建築物設置太陽光電發電設備標準｜建築面積達 1,000m² 強制設置屋頂光電",
+        question: "新建建築物什麼條件下強制要在屋頂裝太陽能板？要裝多少容量（kW）？",
+        metrics: "新建/增建/改建建築面積 ≥ 1,000m² 者，每 20m² 建築面積應設置 1 kW 太陽光電（每 1kW 預留約 10m² 屋頂有效受光面積）",
+        summary: "直接對應本院「智慧淨零‧創新實作」計畫低碳化主軸！設計屋頂花園與機電空間時必須預留光電面積。",
+        excerpt: "新建、增建或改建之建築物，其建築面積達一千平方公尺以上者，起造人應設置太陽光電發電設備。前項應設置之裝置容量，以新建、增建或改建部分之建築面積，每二十平方公尺設置一瓩（kW）計算。"
+      },
+      {
+        id: "J0110110-a-3",
+        lawId: "J0110110",
+        lawName: "建築物設置透水保水或滯洪設施適用範圍及容量標準",
+        articleNo: "第 3、4 條",
+        anchor: "a-3",
+        city: "ALL",
+        stages: ["D5"],
+        components: ["#綠建築與微氣候"],
+        occupancy: ["ALL"],
+        hasOfficialFigure: false,
+        hasOfficialTable: false,
+        title: "建築物透水保水或滯洪設施標準｜基地面積 > 300m² 最小滯洪容量（0.045 m³/m²）",
+        question: "景觀與地下室筏基要留多少雨水滯洪池？公式怎麼算？",
+        metrics: "都市計畫地區新建基地面積 > 300m² 應設置｜最小保水或滯洪容量 = 基地面積 (m²) × 0.045 (m³/m²)",
+        summary: "例如 1,200 m² 的基地，至少需在筏基或景觀設計出 1,200 × 0.045 = 54 m³ 的雨水滯洪儲留空間。",
+        excerpt: "都市計畫地區新建建築物之基地面積超過三百平方公尺者，應設置透水、保水或滯洪設施。其最小容量以建築基地面積乘以零點零四五（立方公尺／平方公尺）計算。"
+      },
+      {
+        id: "NLMA-976-p1",
+        lawId: "NLMA-976",
+        lawName: "建築基地綠化設計技術規範（含綠建築 6 大規範）",
+        articleNo: "綠化率與 CO2 固定量計算",
+        anchor: "p-1",
+        city: "ALL",
+        stages: ["D5"],
+        components: ["#綠建築與微氣候"],
+        occupancy: ["ALL"],
+        hasOfficialFigure: false,
+        hasOfficialTable: true,
+        title: "綠建築 6 大技術規範｜基地綠化 (NLMA-976)、保水 (NLMA-961) 與節能 ENVLOAD",
+        question: "設計課做 EEWH 綠建築評估時，喬木跟灌木的 CO2 固定量、外殼耗能（ENVLOAD）規範在哪查？",
+        metrics: "收錄國土署 6 部綠建築設計技術規範（綠化、保水、節能、雨水、雜排水、綠建材）與建研所標章作業要點全文",
+        summary: "openlawtw (v0.25.3) 已將國土署 6 本綠建築技術規範 PDF 逐頁文字化，支援搜尋覆土深度、透水鋪面與外遮陽係數。",
+        excerpt: "建築基地綠化設計技術規範：透過大喬木、小喬木、灌木、爬藤及草花之複層植栽配置，計算建築基地二十年二氧化碳固定量指標（TCO2）與最小綠化面積。"
+      }
+    ];
+
+    // 篩選狀態變數
+    let currentStage = "ALL";
+    let currentComponent = "ALL";
+    let currentOccupancy = "ALL";
+    let onlyVisuals = false;
+    let selectedLawIds = new Set();
+
+    const COMPONENT_LIST = [
+      "ALL",
+      "#建築線與通路",
+      "#騎樓與退縮",
+      "#建蔽與容積",
+      "#高度與削線屋突",
+      "#居室採光通風",
+      "#樓梯與步行距離",
+      "#無障礙與電梯廁所",
+      "#地下室與停車車道",
+      "#防火區劃與外牆",
+      "#綠建築與微氣候"
+    ];
+
+    // 初始化
+    window.addEventListener("DOMContentLoaded", () => {
+      renderComponentTags();
+      applyFilters();
+      runCalculators();
+    });
+
+    function switchMainTab(tab) {
+      ["navigator", "calculator", "pipeline"].forEach(t => {
+        document.getElementById(`view-${t}`).classList.toggle("hidden", t !== tab);
+        const btn = document.getElementById(`tab-btn-${t}`);
+        if (t === tab) {
+          btn.className = "px-3.5 py-1.5 rounded text-sm font-medium cute-green text-white transition";
+        } else {
+          btn.className = "px-3.5 py-1.5 rounded text-sm font-medium bg-stone-100 text-gray-700 hover:bg-stone-200 transition";
+        }
+      });
+    }
+
+    function renderComponentTags() {
+      const container = document.getElementById("componentTags");
+      container.innerHTML = COMPONENT_LIST.map(tag => {
+        const active = tag === currentComponent;
+        const label = tag === "ALL" ? "全部空間部位" : tag;
+        return `<button onclick="setComponent('${tag}')" class="px-2.5 py-1 rounded border transition ${
+          active ? "cute-green text-white font-medium" : "bg-stone-50 hover:bg-stone-100 text-gray-700"
+        }">${label}</button>`;
+      }).join("");
+    }
+
+    function setStage(stage) {
+      currentStage = stage;
+      document.querySelectorAll(".stage-btn").forEach(btn => {
+        const isTarget = btn.getAttribute("data-stage") === stage;
+        btn.className = `stage-btn w-full text-left px-3 py-2 rounded border flex justify-between items-center transition ${
+          isTarget ? "cute-green text-white font-medium" : "bg-stone-50 hover:bg-stone-100 text-gray-800"
+        }`;
+      });
+      applyFilters();
+    }
+
+    function setComponent(comp) {
+      currentComponent = comp;
+      renderComponentTags();
+      applyFilters();
+    }
+
+    function setOccupancy(occ) {
+      currentOccupancy = occ;
+      document.querySelectorAll(".occ-btn").forEach(btn => {
+        const isTarget = btn.getAttribute("data-occ") === occ;
+        btn.className = `occ-btn py-1.5 px-2 rounded border transition ${
+          isTarget ? "cute-green text-white font-medium" : "bg-stone-50 hover:bg-stone-100 text-gray-700"
+        }`;
+      });
+      applyFilters();
+    }
+
+    function filterOnlyVisuals() {
+      onlyVisuals = !onlyVisuals;
+      document.getElementById("visualFilterIndicator").classList.toggle("hidden", !onlyVisuals);
+      applyFilters();
+    }
+
+    function quickSearch(query) {
+      document.getElementById("searchInput").value = query;
+      currentStage = "ALL";
+      currentComponent = "ALL";
+      onlyVisuals = false;
+      document.getElementById("visualFilterIndicator").classList.add("hidden");
+      setStage("ALL");
+      renderComponentTags();
+    }
+
+    function resetAllFilters() {
+      document.getElementById("searchInput").value = "";
+      document.getElementById("cityFilter").value = "ALL";
+      onlyVisuals = false;
+      document.getElementById("visualFilterIndicator").classList.add("hidden");
+      setOccupancy("ALL");
+      setComponent("ALL");
+      setStage("ALL");
+    }
+
+    function applyFilters() {
+      const city = document.getElementById("cityFilter").value;
+      const query = document.getElementById("searchInput").value.trim().toLowerCase();
+
+      // 更新縣市提示文字
+      const cityNames = {
+        ALL: "目前顯示：中央核心法規。切換為「臺北市 / 新北市 / 桃園市 / 新竹縣市」將自動置頂該縣市之騎樓、現有巷道、畸零地與挑空自治條例。",
+        TPE: "📍 已鎖定【臺北市基地】：已為您自動置頂《臺北市樓層高度及夾層挑空規則》與《北市現有巷道申請建築原則》！",
+        NTP: "📍 已鎖定【新北市基地】：已為您自動置頂《新北市騎樓及無遮簷人行道設置標準》與《新北畸零地使用規則》！",
+        TYN: "📍 已鎖定【桃園市基地】：已為您自動置頂《桃園市建築管理自治條例》與《低碳綠色城市自治條例》！",
+        HSZ: "📍 已鎖定【新竹縣市基地（含湖口校區周邊）】：已為您自動置頂《新竹縣湖口（王爺壟）都市設計管制要點》與竹縣市建管條例！"
+      };
+      document.getElementById("cityHintText").textContent = cityNames[city] || cityNames.ALL;
+
+      let filtered = LAW_DATA.filter(item => {
+        // 縣市過濾：若選特定縣市，顯示「該縣市專用條例」+「中央通用條文」；若選 ALL，顯示全部
+        if (city !== "ALL" && item.city !== "ALL" && item.city !== city) return false;
+        if (currentStage !== "ALL" && !item.stages.includes(currentStage)) return false;
+        if (currentComponent !== "ALL" && !item.components.includes(currentComponent)) return false;
+        if (currentOccupancy !== "ALL" && !item.occupancy.includes("ALL") && !item.occupancy.includes(currentOccupancy)) return false;
+        if (onlyVisuals && !item.hasOfficialFigure && !item.hasOfficialTable) return false;
+
+        if (query) {
+          const hay = `${item.title} ${item.question} ${item.metrics} ${item.summary} ${item.excerpt} ${item.lawName} ${item.articleNo} ${item.components.join(" ")}`.toLowerCase();
+          return query.split(/\s+/).every(kw => hay.includes(kw));
+        }
+        return true;
+      });
+
+      // 若選了特定縣市，將該縣市專用自治條例排在最前面
+      if (city !== "ALL") {
+        filtered.sort((a, b) => (b.city === city ? 1 : 0) - (a.city === city ? 1 : 0));
+      }
+
+      document.getElementById("resultCount").textContent = filtered.length;
+      renderCards(filtered);
+    }
+
+    function renderCards(items) {
+      const container = document.getElementById("lawCardsContainer");
+      if (items.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white p-8 rounded-lg border cute-border text-center text-gray-500 text-sm">
+            找不到符合條件的條文，請嘗試點選「清除篩選」或切換上方設計階段。
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = items.map(item => {
+        const isChecked = selectedLawIds.has(item.id);
+        const openlawUrl = `https://openlawtw.vercel.app/laws/${encodeURIComponent(item.lawId)}.html#${item.anchor}`;
+        const cityBadge = item.city !== "ALL"
+          ? `<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-200">📍 地方自治條例 (${item.city})</span>`
+          : "";
+        const figureBadge = item.hasOfficialFigure
+          ? `<span class="px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-100 text-emerald-900 border border-emerald-300">🖼️ 含內政部官方圖例/裁圖</span>`
+          : "";
+        const tableBadge = item.hasOfficialTable
+          ? `<span class="px-2 py-0.5 rounded text-[11px] font-medium bg-sky-100 text-sky-900 border border-sky-300">📊 含結構化表格</span>`
+          : "";
+
+        return `
+          <article class="bg-white rounded-lg border cute-border shadow-sm hover:shadow-md transition p-5 space-y-3">
+            <!-- 頂部標籤與勾選框 -->
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex flex-wrap items-center gap-1.5">
+                ${item.stages.map(s => `<span class="px-2 py-0.5 rounded text-[11px] font-bold cute-green text-white">${s}</span>`).join("")}
+                ${cityBadge}
+                ${figureBadge}
+                ${tableBadge}
+                ${item.components.map(c => `<span class="px-2 py-0.5 rounded text-[11px] bg-stone-100 text-gray-700 border">${c}</span>`).join("")}
+              </div>
+              <label class="flex items-center gap-1.5 text-xs text-gray-600 cursor-pointer select-none">
+                <input type="checkbox" ${isChecked ? "checked" : ""} onchange="toggleSelectLaw('${item.id}')" class="rounded text-emerald-700 focus:ring-emerald-700" />
+                納入設計檢討表
+              </label>
+            </div>
+
+            <!-- 標題與學生白話問題 -->
+            <div>
+              <h3 class="text-base font-bold text-gray-900">${item.title}</h3>
+              <p class="text-xs text-emerald-800 font-medium mt-0.5">💬 設計課常見問題：${item.question}</p>
+            </div>
+
+            <!-- 琥珀色定量檢核指標橫幅 -->
+            <div class="bg-amber-50/90 border border-amber-200 rounded-md p-3 text-xs">
+              <span class="font-bold text-amber-900">📏 圖面定量檢核指標：</span>
+              <span class="text-amber-950 font-semibold">${item.metrics}</span>
+            </div>
+
+            ${item.hasOfficialFigure ? `
+              <div class="bg-emerald-50/70 border border-emerald-200 rounded px-3 py-2 text-xs text-emerald-900 flex items-center justify-between">
+                <span>🖼️ <strong>視覺圖解說明：</strong>${item.figureNote}</span>
+                <button onclick="openDrawer('${item.id}')" class="text-emerald-800 font-bold underline ml-2 shrink-0">開啟圖解 →</button>
+              </div>
+            ` : ""}
+
+            <!-- 摘要與條文折疊 -->
+            <p class="text-xs text-gray-600 leading-relaxed">${item.summary}</p>
+
+            <details class="text-xs bg-stone-50 rounded border p-2.5">
+              <summary class="cursor-pointer font-medium text-gray-700">展開條文原文摘錄（${item.lawName} ${item.articleNo}）</summary>
+              <pre class="mt-2 whitespace-pre-wrap font-sans text-gray-700 leading-relaxed">${item.excerpt}</pre>
+            </details>
+
+            <!-- 底部操作按鈕：支援側邊抽屜免跳頁預覽 & 直連 openlawtw -->
+            <div class="pt-1 flex flex-wrap items-center justify-between gap-2 border-t text-xs">
+              <span class="text-gray-400">法源 ID：<code>${item.lawId}#${item.anchor}</code></span>
+              <div class="flex items-center gap-2">
+                <button onclick="openDrawer('${item.id}')" class="px-3 py-1.5 rounded font-medium bg-stone-100 hover:bg-stone-200 text-gray-800 border">
+                  📖 側邊抽屜預覽 (條文/圖例/函釋)
+                </button>
+                <a href="${openlawUrl}" target="_blank" rel="noreferrer" class="px-3 py-1.5 rounded font-medium cute-green text-white hover:opacity-90">
+                  直連 openlawtw 錨點 ↗
+                </a>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    // 側邊抽屜開啟 openlawtw 對應條文與圖例
+    function openDrawer(id) {
+      const item = LAW_DATA.find(x => x.id === id);
+      if (!item) return;
+      const url = `https://openlawtw.vercel.app/laws/${encodeURIComponent(item.lawId)}.html#${item.anchor}`;
+
+      document.getElementById("drawerBadge").textContent = `${item.lawName} · ${item.articleNo}`;
+      document.getElementById("drawerTitle").textContent = item.title;
+      document.getElementById("drawerMetrics").textContent = `📏 檢核指標：${item.metrics}`;
+      document.getElementById("drawerExternalLink").href = url;
+
+      const visualAlert = document.getElementById("drawerVisualAlert");
+      if (item.hasOfficialFigure || item.hasOfficialTable) {
+        visualAlert.classList.remove("hidden");
+        document.getElementById("drawerVisualText").textContent = item.figureNote || "本條於 openlawtw 內建結構化 HTML 表格與函釋並讀";
+        document.getElementById("drawerVisualBtn").href = url;
+      } else {
+        visualAlert.classList.add("hidden");
+      }
+
+      document.getElementById("drawerIframe").src = url;
+      document.getElementById("lawDrawerBackdrop").classList.remove("hidden");
+      document.getElementById("lawDrawer").classList.remove("translate-x-full");
+    }
+
+    function closeDrawer() {
+      document.getElementById("lawDrawerBackdrop").classList.add("hidden");
+      document.getElementById("lawDrawer").classList.add("translate-x-full");
+    }
+
+    // 勾選與匯出 Markdown 建築計畫書法規檢討表
+    function toggleSelectLaw(id) {
+      if (selectedLawIds.has(id)) selectedLawIds.delete(id);
+      else selectedLawIds.add(id);
+      document.getElementById("selectedCountBadge").textContent = selectedLawIds.size;
+    }
+
+    function exportSelectedToMarkdown() {
+      const picked = LAW_DATA.filter(x => selectedLawIds.has(x.id));
+      if (picked.length === 0) {
+        alert("請先在卡片右上角勾選「納入設計檢討表」的條文！");
+        return;
+      }
+      const city = document.getElementById("cityFilter").selectedOptions[0].text;
+      let md = `# 建築設計課程法規檢討清單（中國科技大學建築系）\n`;
+      md += `- 基地條件設定：${city}\n- 匯出日期：${new Date().toISOString().slice(0, 10)}\n\n`;
+      md += `| 設計階段 | 法規與條號 | 圖面定量檢核指標 | 設計自評結果 | openlawtw 條文錨點 |\n`;
+      md += `| :--- | :--- | :--- | :--- | :--- |\n`;
+      picked.forEach(p => {
+        const url = `https://openlawtw.vercel.app/laws/${encodeURIComponent(p.lawId)}.html#${p.anchor}`;
+        md += `| ${p.stages.join("/")} | ${p.lawName} ${p.articleNo} | ${p.metrics} | □ 符合 / □ 須修正 | [查看原文](${url}) |\n`;
+      });
+
+      const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "建築設計課程_法規檢討表.md";
+      a.click();
+    }
+
+    // 載入本機 Python 腳本轉出的 design_laws_core.json
+    function handleJsonUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (Array.isArray(imported)) {
+            LAW_DATA = imported;
+            applyFilters();
+            alert(`✅ 成功載入 ${imported.length} 筆 openlawtw 轉換條文！`);
+          }
+        } catch (err) {
+          alert("JSON 格式解析失敗：" + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // 設計快算器邏輯
+    function runCalculators() {
+      const site = parseFloat(document.getElementById("calcSiteArea").value) || 0;
+      const bcr = parseFloat(document.getElementById("calcBCR").value) || 0;
+      const far = parseFloat(document.getElementById("calcFAR").value) || 0;
+
+      const maxFootprint = site * (bcr / 100);
+      const maxGFA = site * (far / 100);
+      const maxCore15 = maxGFA * 0.15;
+      const maxRoof1_8 = Math.max(18, maxFootprint * 0.125);
+      const minDetention = site * 0.045;
+      const minSolarKW = maxFootprint >= 1000 ? (maxFootprint / 20).toFixed(1) : "未達 1,000m² 免強制（鼓勵設置）";
+
+      document.getElementById("calcAreaOutput").innerHTML = `
+        <div>‧ <strong>最大建築面積（建蔽上限）</strong>：<span class="text-emerald-800 font-bold">${maxFootprint.toFixed(2)} m²</span></div>
+        <div>‧ <strong>基準容積總樓地板面積（GFA 上限）</strong>：<span class="text-emerald-800 font-bold">${maxGFA.toFixed(2)} m²</span></div>
+        <div>‧ <strong>機電＋安全梯＋管委會免計上限 (§162 15%)</strong>：<span class="text-amber-800 font-bold">${maxCore15.toFixed(2)} m²</span>（單一樓梯建築為 10% = ${(maxGFA * 0.1).toFixed(2)} m²）</div>
+        <div>‧ <strong>屋頂突出物免計樓層投影面積上限 (§1 1/8)</strong>：<span class="text-amber-800 font-bold">${maxRoof1_8.toFixed(2)} m²</span>（高層建築可達 15% = ${(maxFootprint * 0.15).toFixed(2)} m²）</div>
+        <div>‧ <strong>最小雨水保水／滯洪池容量 (J0110110)</strong>：<span class="font-bold">${minDetention.toFixed(2)} m³</span>｜<strong>屋頂太陽光電 (D0070319)</strong>：<span class="font-bold">${minSolarKW} kW</span></div>
+      `;
+
+      const h = parseFloat(document.getElementById("calcRampHeight").value) || 0;
+      const slope = parseFloat(document.getElementById("calcRampSlope").value) || 12;
+      const rampLenM = (h * slope) / 100;
+      const landings = Math.max(0, Math.ceil(h / 75) - 1);
+      const totalLenM = rampLenM + (landings * 1.5) + 3.0; // 含起終點平台各1.5m
+
+      document.getElementById("calcRampOutput").innerHTML = `
+        <div>‧ <strong>坡道斜段水平投影淨長</strong>：<span class="text-emerald-800 font-bold">${rampLenM.toFixed(2)} 公尺</span>（${(rampLenM * 100).toFixed(0)} cm）</div>
+        <div>‧ <strong>中途轉折／休息平台需求（每高差 75cm 設一處 ≥1.5m）</strong>：需設 <span class="text-amber-800 font-bold">${landings} 處</span> 中途平台</div>
+        <div>‧ <strong>含起點、終點與中途平台總展開長度估算</strong>：約 <span class="font-bold">${totalLenM.toFixed(2)} 公尺</span>（坡道淨寬須 ≥ 90cm，兩側設雙層扶手 65/85cm）</div>
+      `;
+    }
+
+    function copyPythonScript() {
+      navigator.clipboard.writeText(document.getElementById("pythonScriptCode").innerText);
+      alert("已複製提示！完整 Python 腳本請見對話框下方說明。");
+    }
+  </script>
+</body>
+</html>
