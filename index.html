@@ -140,7 +140,19 @@ footer{border-top:1px solid var(--line);margin-top:30px;padding:16px 0 40px;font
   border-bottom:1px solid var(--line)}
 .dw-note b{color:inherit}
 .drawer iframe{flex:1;width:100%;border:0;background:var(--bg)}
-.dw-fallback{padding:18px 16px;font-size:14px;color:var(--dim)}
+.drawer iframe[hidden]{display:none}
+.dw-fallback{flex:1;overflow:auto;padding:18px 18px 40px;font-size:14.5px;line-height:1.85}
+.dw-fallback[hidden]{display:none}
+.dw-fallback h5{margin:0 0 6px;font-size:15px;color:var(--green)}
+.dw-fallback ol{margin:8px 0 18px;padding-left:22px}
+.dw-fallback li{margin-bottom:5px}
+.dw-fallback .pdfbtn{display:inline-block;background:var(--green);color:var(--bg);text-decoration:none;
+  border-radius:7px;padding:11px 18px;font-weight:700;margin:4px 0 16px}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .dw-fallback .pdfbtn{color:#16231e}}
+:root[data-theme="dark"] .dw-fallback .pdfbtn{color:#16231e}
+.dw-fallback .sec{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);
+  border-radius:7px;padding:12px 14px;margin-bottom:16px}
+.dw-fallback .why{color:var(--dim);font-size:13px}
 </style>
 </head>
 <body>
@@ -325,6 +337,7 @@ footer{border-top:1px solid var(--line);margin-top:30px;padding:16px 0 40px;font
   </div>
   <div class="dw-note" id="dwNote"></div>
   <iframe id="dwFrame" title="條文與函釋並讀" src="about:blank"></iframe>
+  <div class="dw-fallback" id="dwFallback" hidden></div>
 </aside>
 
 <footer class="wrap">
@@ -672,7 +685,7 @@ function openDrawer(id){
   var note = [];
   if (isA){
     note.push('官方 PDF 實體第 ' + r.p1 + (r.p2 && r.p2 !== r.p1 ? '–' + r.p2 : '') + ' 頁');
-    if (r.imgs && r.imgs.length) note.push('本節原 PDF 含 <b>' + r.imgs.length + ' 張尺寸圖</b>，右側即為官方原檔');
+    if (r.imgs && r.imgs.length) note.push('本節原 PDF 含 <b>' + r.imgs.length + ' 張尺寸圖</b>，圖號與頁碼列於下方');
   } else {
     note.push(r.rc ? '這一條有 <b>' + r.rc + ' 筆國土管理署函釋</b>，右側可條文與函釋並讀'
                    : '這一條目前無收錄函釋');
@@ -689,9 +702,36 @@ function openDrawer(id){
   a.textContent = isA ? '在新分頁開啟官方 PDF ↗' : '在新分頁開啟 openlawtw ↗';
 
   var fr = document.getElementById('dwFrame');
-  /* 同一法規換條號時 hash 變更不會重載，先清空再設，確保跳到正確錨點 */
-  fr.src = 'about:blank';
-  setTimeout(function(){ fr.src = url; }, 30);
+  var fb = document.getElementById('dwFallback');
+  if (isA){
+    /* 國土署的官方 PDF 不允許被內嵌，硬塞 iframe 只會得到一片空白，改給可用的東西 */
+    fr.src = 'about:blank';
+    fr.hidden = true;
+    fb.hidden = false;
+    var L = [];
+    L.push('<h5>' + esc(r.chapter) + '　' + esc(r.no) + '</h5>');
+    L.push('<div class="sec">' + esc(r.text) + '</div>');
+    L.push('<a class="pdfbtn" href="' + esc(url) + '" target="_blank" rel="noopener">開啟官方 PDF 第 '
+         + r.p1 + (r.p2 && r.p2 !== r.p1 ? '–' + r.p2 : '') + ' 頁 ↗</a>');
+    if (r.imgs && r.imgs.length){
+      L.push('<h5>本節在官方 PDF 上的圖</h5>');
+      L.push('<ol>' + r.imgs.map(function(g){
+        return '<li>' + esc(g.alt || '（圖）') + '　<span class="why">實體第 ' + g.page + ' 頁</span></li>';
+      }).join('') + '</ol>');
+    }
+    L.push('<p class="why">這裡不內嵌官方 PDF，有兩個原因：國土管理署的網站不允許其檔案被其他網頁內嵌；'
+         + '本頁也未轉載那 139 張裁圖，因為 openlawtw 的權利清單載明逐圖核對狀態為待核。'
+         + '文字在上面可以直接讀，圖請按上面的按鈕開官方原檔。</p>');
+    fb.innerHTML = L.join('');
+    fb.scrollTop = 0;
+  } else {
+    fb.hidden = true;
+    fb.innerHTML = '';
+    fr.hidden = false;
+    /* 同一法規換條號時 hash 變更不會重載，先清空再設，確保跳到正確錨點 */
+    fr.src = 'about:blank';
+    setTimeout(function(){ fr.src = url; }, 30);
+  }
 
   document.getElementById('scrim').hidden = false;
   document.getElementById('drawer').hidden = false;
