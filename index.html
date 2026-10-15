@@ -817,9 +817,15 @@ function card(r, ts){
     h.push('<a href="https://www.nlma.gov.tw/ch/legislation/regsearch/927" target="_blank" rel="noopener">國土署法規頁 ↗</a>');
   } else {
     /* openlawtw 的連結在側邊預覽的標題列已經有了，這裡不重複 */
-    if (r.lawId.indexOf('-') < 0)
-      h.push('<a href="https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=' + esc(r.lawId)
-           + '" target="_blank" rel="noopener">全國法規資料庫 ↗</a>');
+    if (r.lawId.indexOf('-') < 0){
+      /* LawAll 是整部法規，學生點進去還要自己找；LawSingle 才會直接停在該條 */
+      var fl = (r.no.match(/^第\s*([0-9]+(?:-[0-9]+)?)\s*條$/) || [])[1];
+      h.push('<a href="https://law.moj.gov.tw/LawClass/'
+           + (fl ? 'LawSingle.aspx?pcode=' + encodeURIComponent(r.lawId) + '&flno=' + encodeURIComponent(fl)
+                 : 'LawAll.aspx?pcode=' + encodeURIComponent(r.lawId))
+           + '" target="_blank" rel="noopener">全國法規資料庫'
+           + (fl ? '　' + esc(r.no) : '') + ' ↗</a>');
+    }
     if (r.figSrc)
       h.push('<a href="' + esc(r.figSrc) + '" target="_blank" rel="noopener">官方補充圖例原檔 ↗</a>');
     (r.fig || []).forEach(function(p, i){
