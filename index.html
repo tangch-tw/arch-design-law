@@ -25,6 +25,9 @@
   --rose:#e9a3ab; --rosebg:#3a2024; --sky:#9ec9e8; --skybg:#1b2b38; --mark:#5c4a12;
 }
 *{box-sizing:border-box}
+/* 任何 class 只要設了 display，就會蓋掉 [hidden] 的瀏覽器預設值。
+   這一行讓 hidden 永遠有效，避免關起來的面板仍然佔位或擋住點擊。 */
+[hidden]{display:none !important}
 body{margin:0;background:var(--bg);color:var(--ink);
   font:16px/1.75 "Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;}
 .wrap{max-width:1180px;margin:0 auto;padding:0 16px}
@@ -113,6 +116,8 @@ mark{background:var(--mark);color:inherit;padding:0 1px;border-radius:2px}
 .calc h3{margin:0 0 4px;font-size:16px}
 .calc .cite{font-size:12.5px;color:var(--dim);margin-bottom:12px}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+/* class 的 display 會蓋掉 [hidden] 的預設值，凡是設了 display 的 class 都要補這一行 */
+.row[hidden]{display:none}
 @media(max-width:560px){.row{grid-template-columns:1fr}}
 .row label{font-size:13px;color:var(--dim);display:block;margin-bottom:3px}
 .out{background:var(--amberbg);border:1px solid var(--line);border-radius:6px;padding:11px 13px;
