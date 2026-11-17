@@ -31,6 +31,16 @@ const LOCAL_HTML = new URL('../index.html', import.meta.url);
 const REPORT = new URL('../upstream-report.md', import.meta.url);
 const TODAY = new Date().toISOString().slice(0, 10);
 
+/* 例行回報月份：這幾個月即使毫無變動也留一筆書面確認。
+   檢查本身每月都跑，一來成本只有數秒，二來 GitHub 會在 60 天沒有
+   repository 活動時自動停用排程，季度或半年的 cron 會在觸發前就失效。 */
+const REPORT_MONTHS = (process.env.REPORT_MONTHS || '1,4,7,10')
+  .split(',')
+  .map((n) => parseInt(n.trim(), 10))
+  .filter((n) => n >= 1 && n <= 12);
+const THIS_MONTH = new Date().getUTCMonth() + 1;
+const IS_REPORT_MONTH = REPORT_MONTHS.includes(THIS_MONTH);
+
 /* ---------------------------------------------------------------- 工具 */
 
 const verParts = (v) => String(v ?? '0').split('.').map((n) => parseInt(n, 10) || 0);
@@ -245,7 +255,11 @@ async function main() {
   L.push('');
   L.push('> 上游自述其版本異動追蹤比對的是該庫版本，不是官方即時修法通知。本核對亦同：它證明本頁與上游一致，不等於已向官方確認為現行版本。');
   L.push('');
-  L.push(`<sub>由 \`scripts/check-upstream.mjs\` 於 ${new Date().toISOString()} 產生。</sub>`);
+  L.push(
+    IS_REPORT_MONTH
+      ? `<sub>由 \`scripts/check-upstream.mjs\` 於 ${new Date().toISOString()} 產生。本月（${THIS_MONTH} 月）為例行回報月份，回報月份設定為 ${REPORT_MONTHS.join('、')} 月；檢查每月執行。</sub>`
+      : `<sub>由 \`scripts/check-upstream.mjs\` 於 ${new Date().toISOString()} 產生。例行回報月份為 ${REPORT_MONTHS.join('、')} 月，本月僅在有差異時通知。</sub>`,
+  );
 
   const report = L.join('\n');
   await writeFile(REPORT, `${report}\n`, 'utf8');
@@ -278,10 +292,12 @@ async function main() {
       [
         `changed=${needsWork}`,
         `n_changed=${changed.length}`,
+        `routine=${!needsWork && IS_REPORT_MONTH}`,
         `verified_bumped=${bumped}`,
         `verified_date=${TODAY}`,
         `upstream_version=${upVer}`,
         `local_version=${localVer}`,
+        `period=${new Date().getUTCFullYear() - 1911}年${THIS_MONTH}月`,
       ].join('\n') + '\n',
       'utf8',
     );
