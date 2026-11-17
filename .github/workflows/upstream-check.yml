@@ -1,4 +1,4 @@
-name: 每月檢查上游 openlawtw
+name: 每月核對上游 openlawtw 條文
 
 on:
   schedule:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   issues: write
 
 concurrency:
@@ -24,7 +24,7 @@ jobs:
         with:
           node-version: '22'
 
-      - name: 比對上游版本
+      - name: 逐條核對上游條文
         id: check
         run: node scripts/check-upstream.mjs
 
@@ -32,18 +32,32 @@ jobs:
         if: always()
         run: cat upstream-report.md >> "$GITHUB_STEP_SUMMARY" || true
 
-      - name: 有新版就開 issue
-        if: steps.check.outputs.outdated == 'true'
+      - name: 條文有差異就開 issue
+        if: steps.check.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-          TITLE: 上游 openlawtw 已更新至 v${{ steps.check.outputs.upstream_version }}
+          TITLE: 條文核對有差異（${{ steps.check.outputs.verified_date }}，${{ steps.check.outputs.n_changed }} 條）
         run: |
           set -euo pipefail
-          existing=$(gh issue list --state open --search "$TITLE in:title" \
-            --json number,title --jq "map(select(.title == \"$TITLE\")) | .[0].number // empty")
+          existing=$(gh issue list --state open --search "條文核對有差異 in:title" \
+            --json number,title --jq '.[0].number // empty')
           if [ -n "$existing" ]; then
-            echo "已有 issue #$existing，補上本次比對結果"
+            echo "已有未結的核對 issue #$existing，補上本次結果"
             gh issue comment "$existing" --body-file upstream-report.md
           else
             gh issue create --title "$TITLE" --body-file upstream-report.md
           fi
+
+      # 條文一致時，把頁面上的「條文核對日」更新為今天，讓使用者看到的日期是新的。
+      # 只改 meta.verified 一個日期字串，腳本在該欄位不是剛好一處時會放棄修改。
+      - name: 條文一致就更新核對日
+        if: steps.check.outputs.verified_bumped == 'true' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        run: |
+          set -euo pipefail
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m "條文核對日更新為 ${{ steps.check.outputs.verified_date }}
+
+          逐條比對 openlawtw@main，條文與上游現行內容一致，未變更任何條文文字。"
+          git push
