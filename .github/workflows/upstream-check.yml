@@ -1,0 +1,49 @@
+name: 每月檢查上游 openlawtw
+
+on:
+  schedule:
+    # 每月 5 日 03:17 UTC，台北時間 11:17
+    - cron: '17 3 5 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: upstream-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: 比對上游版本
+        id: check
+        run: node scripts/check-upstream.mjs
+
+      - name: 寫入執行摘要
+        if: always()
+        run: cat upstream-report.md >> "$GITHUB_STEP_SUMMARY" || true
+
+      - name: 有新版就開 issue
+        if: steps.check.outputs.outdated == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITLE: 上游 openlawtw 已更新至 v${{ steps.check.outputs.upstream_version }}
+        run: |
+          set -euo pipefail
+          existing=$(gh issue list --state open --search "$TITLE in:title" \
+            --json number,title --jq "map(select(.title == \"$TITLE\")) | .[0].number // empty")
+          if [ -n "$existing" ]; then
+            echo "已有 issue #$existing，補上本次比對結果"
+            gh issue comment "$existing" --body-file upstream-report.md
+          else
+            gh issue create --title "$TITLE" --body-file upstream-report.md
+          fi

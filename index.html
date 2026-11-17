@@ -36,6 +36,13 @@ header{background:var(--green);color:#f7f5f0;padding:18px 0 14px}
 :root[data-theme="dark"] header{background:#16231e;color:var(--ink)}
 header h1{margin:0;font-size:19px;letter-spacing:.4px}
 header .sub{font-size:12.5px;opacity:.85;margin-top:3px}
+header .verline{font-size:12px;opacity:.78;margin-top:6px;display:flex;flex-wrap:wrap;
+  gap:4px 10px;align-items:baseline;line-height:1.6}
+header .verline b{font-weight:600;opacity:.95}
+header .verline button{border:0;background:rgba(255,255,255,.16);color:inherit;cursor:pointer;
+  font:inherit;font-size:11.5px;padding:1px 8px;border-radius:999px}
+header .verline button:hover{background:rgba(255,255,255,.26)}
+@media(max-width:560px){header .verline{font-size:11.5px;gap:2px 8px}}
 nav.tabs{display:flex;gap:6px;margin-top:13px;flex-wrap:wrap}
 nav.tabs button{border:0;border-radius:6px 6px 0 0;padding:8px 14px;font-size:14px;cursor:pointer;
   background:rgba(255,255,255,.14);color:inherit;font-family:inherit}
@@ -171,6 +178,7 @@ footer{border-top:1px solid var(--line);margin-top:30px;padding:16px 0 40px;font
   <div class="wrap">
     <h1>建築設計課程法規導航</h1>
     <div class="sub">中國科技大學規劃與設計學院　建築系　｜　依設計階段查條文，每一條都附原文與官方連結</div>
+    <div class="verline" id="verline"></div>
     <nav class="tabs" role="tablist">
       <button id="t-nav"  role="tab" aria-selected="true"  onclick="tab('nav')">法規導航</button>
       <button id="t-calc" role="tab" aria-selected="false" onclick="tab('calc')">設計快算</button>
@@ -1062,6 +1070,14 @@ calcA(); calcH(); calcB(); calcC(); calcD(); calcE();
   document.getElementById('m_cat').textContent    = 'v' + META.catalogVersion;
   document.getElementById('m_snap').textContent   = META.snapshot;
   document.getElementById('m_built').textContent  = META.built;
+
+  /* 頁首版本列：法規快照日與本頁建置日直接露出，不必進「資料來源與限制」頁籤才看得到 */
+  document.getElementById('verline').innerHTML =
+      '<span>法規快照　<b>' + esc(String(META.snapshot || '未記錄').replace(/\s+上午.*$/, '')) + '</b></span>'
+    + '<span>本頁建置　<b>' + esc(META.built || '未記錄') + '</b></span>'
+    + '<span>無障礙規範原文取得　<b>' + esc(META.a11yRetrieved || '未記錄') + '</b></span>'
+    + '<span>openlawtw v' + esc(META.catalogVersion || '—') + '</span>'
+    + '<button type="button" onclick="tab(\'src\')">版本與已知限制</button>';
   document.getElementById('m_trunc').textContent  =
     '本頁有 ' + nTr + ' 條因官方快照截斷而表格不完整，已在該條卡片上標示警語並附官方連結。';
   document.getElementById('m_a11y').textContent =
