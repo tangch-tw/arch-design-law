@@ -34,17 +34,17 @@ body{margin:0;background:var(--bg);color:var(--ink);
 header{background:var(--green);color:#f7f5f0;padding:18px 0 14px}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) header{background:#16231e;color:var(--ink)}}
 :root[data-theme="dark"] header{background:#16231e;color:var(--ink)}
-header h1{margin:0;font-size:19px;letter-spacing:.4px}
-header .sub{font-size:12.5px;opacity:.85;margin-top:3px}
-header .verline{font-size:12px;opacity:.78;margin-top:6px;display:flex;flex-wrap:wrap;
+header h1{margin:0;font-size:21.8px;letter-spacing:.4px}
+header .sub{font-size:14.4px;opacity:.85;margin-top:3px}
+header .verline{font-size:13.8px;opacity:.78;margin-top:6px;display:flex;flex-wrap:wrap;
   gap:4px 10px;align-items:baseline;line-height:1.6}
 header .verline b{font-weight:600;opacity:.95}
 header .verline button{border:0;background:rgba(255,255,255,.16);color:inherit;cursor:pointer;
-  font:inherit;font-size:11.5px;padding:1px 8px;border-radius:999px}
+  font:inherit;font-size:13.2px;padding:1px 8px;border-radius:999px}
 header .verline button:hover{background:rgba(255,255,255,.26)}
-@media(max-width:560px){header .verline{font-size:11.5px;gap:2px 8px}}
+@media(max-width:560px){header .verline{font-size:13.2px;gap:2px 8px}}
 nav.tabs{display:flex;gap:6px;margin-top:13px;flex-wrap:wrap}
-nav.tabs button{border:0;border-radius:6px 6px 0 0;padding:8px 14px;font-size:14px;cursor:pointer;
+nav.tabs button{border:0;border-radius:6px 6px 0 0;padding:8px 14px;font-size:16.1px;cursor:pointer;
   background:rgba(255,255,255,.14);color:inherit;font-family:inherit}
 nav.tabs button[aria-selected="true"]{background:var(--bg);color:var(--green);font-weight:700}
 main{padding:18px 0 60px}
@@ -60,83 +60,83 @@ main{padding:18px 0 60px}
   .grid{display:flex;flex-direction:column}
   .side{position:static;order:2}
   .maincol{order:1}
-  .side>summary{display:block;cursor:pointer;font-weight:700;font-size:14.5px;list-style:none}
+  .side>summary{display:block;cursor:pointer;font-weight:700;font-size:16.7px;list-style:none}
   .side>summary::after{content:"　▾"}
   .side[open]>summary::after{content:"　▴"}
 }
-.side h3{margin:0 0 8px;font-size:12.5px;color:var(--dim);letter-spacing:.6px}
+.side h3{margin:0 0 8px;font-size:14.4px;color:var(--dim);letter-spacing:.6px}
 .side h3+.h3gap{margin-top:16px}
 .stage{display:block;width:100%;text-align:left;border:1px solid var(--line);background:transparent;color:inherit;
-  border-radius:6px;padding:7px 10px;margin-bottom:5px;font-size:13.5px;cursor:pointer;font-family:inherit}
+  border-radius:6px;padding:7px 10px;margin-bottom:5px;font-size:15.5px;cursor:pointer;font-family:inherit}
 .stage[aria-pressed="true"]{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:700}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .stage[aria-pressed="true"]{color:#16231e}}
 :root[data-theme="dark"] .stage[aria-pressed="true"]{color:#16231e}
 .chips{display:flex;flex-wrap:wrap;gap:5px}
 .chip{border:1px solid var(--line);background:transparent;color:inherit;border-radius:999px;
-  padding:4px 10px;font-size:12.5px;cursor:pointer;font-family:inherit}
+  padding:4px 10px;font-size:14.4px;cursor:pointer;font-family:inherit}
 .chip[aria-pressed="true"]{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:700}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .chip[aria-pressed="true"]{color:#16231e}}
 :root[data-theme="dark"] .chip[aria-pressed="true"]{color:#16231e}
 select,input[type=text],input[type=number]{width:100%;padding:8px 10px;border:1px solid var(--line);
-  border-radius:6px;background:var(--card);color:inherit;font-size:14px;font-family:inherit}
+  border-radius:6px;background:var(--card);color:inherit;font-size:16.1px;font-family:inherit}
 .searchbox{display:flex;gap:8px;margin-bottom:10px}
-.searchbox input{flex:1;font-size:15.5px;padding:11px 12px}
+.searchbox input{flex:1;font-size:17.8px;padding:11px 12px}
 .btn{border:1px solid var(--line);background:var(--card);color:inherit;border-radius:6px;
-  padding:8px 14px;font-size:14px;cursor:pointer;white-space:nowrap;font-family:inherit}
+  padding:8px 14px;font-size:16.1px;cursor:pointer;white-space:nowrap;font-family:inherit}
 .btn.pri{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:700}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.pri{color:#16231e}}
 :root[data-theme="dark"] .btn.pri{color:#16231e}
 .ask{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
 .ask button{border:1px solid var(--line);background:var(--amberbg);color:var(--amber);
-  border-radius:999px;padding:5px 12px;font-size:13px;cursor:pointer;font-family:inherit}
-.count{font-size:13px;color:var(--dim);margin:10px 2px}
+  border-radius:999px;padding:5px 12px;font-size:14.9px;cursor:pointer;font-family:inherit}
+.count{font-size:14.9px;color:var(--dim);margin:10px 2px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:14px 16px;margin-bottom:11px}
-.card h4{margin:0 0 3px;font-size:16px;line-height:1.5}
-.card .path{font-size:12px;color:var(--dim);margin-bottom:8px}
+.card h4{margin:0 0 3px;font-size:18.4px;line-height:1.5}
+.card .path{font-size:13.8px;color:var(--dim);margin-bottom:8px}
 .tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px}
-.tg{font-size:11.5px;padding:2px 8px;border-radius:4px;border:1px solid var(--line);color:var(--dim)}
+.tg{font-size:13.2px;padding:2px 8px;border-radius:4px;border:1px solid var(--line);color:var(--dim)}
 .tg.st{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:700}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tg.st{color:#16231e}}
 :root[data-theme="dark"] .tg.st{color:#16231e}
 .tg.city{background:var(--rosebg);color:var(--rose);border-color:var(--rose)}
 .tg.fig{background:var(--skybg);color:var(--sky);border-color:var(--sky)}
-.body{white-space:pre-wrap;font-size:14.5px;line-height:1.85;overflow-x:auto}
-.body.tbl{font-family:"Noto Sans Mono CJK TC","Menlo",monospace;font-size:13px;line-height:1.5;white-space:pre}
+.body{white-space:pre-wrap;font-size:16.7px;line-height:1.85;overflow-x:auto}
+.body.tbl{font-family:"Noto Sans Mono CJK TC","Menlo",monospace;font-size:14.9px;line-height:1.5;white-space:pre}
 .body.clip{max-height:7.2em;overflow:hidden;position:relative}
 .body.clip::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2.6em;
   background:linear-gradient(to bottom,transparent,var(--card))}
-.more{margin-top:6px;font-size:13px;color:var(--green);background:none;border:0;cursor:pointer;padding:0;font-family:inherit}
-.links{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;font-size:13px}
+.more{margin-top:6px;font-size:14.9px;color:var(--green);background:none;border:0;cursor:pointer;padding:0;font-family:inherit}
+.links{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;font-size:14.9px}
 .links a{color:var(--green);text-decoration:none;border:1px solid var(--line);border-radius:5px;padding:4px 10px}
 .links a:hover{text-decoration:underline}
 .warn{margin-top:9px;background:var(--amberbg);border:1px solid var(--amber);color:var(--amber);
-  border-radius:6px;padding:8px 11px;font-size:13px}
+  border-radius:6px;padding:8px 11px;font-size:14.9px}
 .note{margin-top:9px;background:var(--rosebg);border:1px solid var(--rose);color:var(--rose);
-  border-radius:6px;padding:8px 11px;font-size:13px;line-height:1.75}
+  border-radius:6px;padding:8px 11px;font-size:14.9px;line-height:1.75}
 .note b{color:inherit}
 .tip{background:var(--rosebg);border:1px solid var(--rose);color:var(--rose);border-radius:8px;
-  padding:11px 14px;font-size:13.5px;line-height:1.8;margin-bottom:12px}
+  padding:11px 14px;font-size:15.5px;line-height:1.8;margin-bottom:12px}
 .tip b{color:inherit}
 .empty{background:var(--card);border:1px dashed var(--line);border-radius:9px;padding:28px 16px;text-align:center;color:var(--dim)}
 mark{background:var(--mark);color:inherit;padding:0 1px;border-radius:2px}
 .calc{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:16px 18px;margin-bottom:14px}
-.calc h3{margin:0 0 4px;font-size:16px}
-.calc .cite{font-size:12.5px;color:var(--dim);margin-bottom:12px}
+.calc h3{margin:0 0 4px;font-size:18.4px}
+.calc .cite{font-size:14.4px;color:var(--dim);margin-bottom:12px}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
 /* class 的 display 會蓋掉 [hidden] 的預設值，凡是設了 display 的 class 都要補這一行 */
 .row[hidden]{display:none}
 @media(max-width:560px){.row{grid-template-columns:1fr}}
-.row label{font-size:13px;color:var(--dim);display:block;margin-bottom:3px}
+.row label{font-size:14.9px;color:var(--dim);display:block;margin-bottom:3px}
 .out{background:var(--amberbg);border:1px solid var(--line);border-radius:6px;padding:11px 13px;
-  font-size:14px;line-height:1.9;white-space:pre-wrap}
-.doc h2{font-size:17px;margin:22px 0 8px;color:var(--green)}
+  font-size:16.1px;line-height:1.9;white-space:pre-wrap}
+.doc h2{font-size:19.5px;margin:22px 0 8px;color:var(--green)}
 .doc h2:first-child{margin-top:0}
-.doc p,.doc li{font-size:14.5px}
-.doc table{width:100%;border-collapse:collapse;font-size:13.5px;margin:8px 0}
+.doc p,.doc li{font-size:16.7px}
+.doc table{width:100%;border-collapse:collapse;font-size:15.5px;margin:8px 0}
 .doc th,.doc td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
 .doc th{background:var(--amberbg);color:var(--amber)}
-.doc code{background:var(--amberbg);padding:1px 5px;border-radius:3px;font-size:12.5px}
-footer{border-top:1px solid var(--line);margin-top:30px;padding:16px 0 40px;font-size:12.5px;color:var(--dim)}
+.doc code{background:var(--amberbg);padding:1px 5px;border-radius:3px;font-size:14.4px}
+footer{border-top:1px solid var(--line);margin-top:30px;padding:16px 0 40px;font-size:14.4px;color:var(--dim)}
 /* 側邊抽屜：條文與函釋並讀 */
 .scrim{position:fixed;inset:0;background:rgba(20,18,14,.42);z-index:40}
 .drawer{position:fixed;top:0;right:0;bottom:0;width:min(780px,94vw);z-index:41;
@@ -148,20 +148,20 @@ footer{border-top:1px solid var(--line);margin-top:30px;padding:16px 0 40px;font
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .dw-head{background:#16231e;color:var(--ink)}}
 :root[data-theme="dark"] .dw-head{background:#16231e;color:var(--ink)}
 .dw-head .g{flex:1;min-width:0}
-.dw-meta{font-size:12px;opacity:.85}
-.dw-title{font-size:16.5px;font-weight:700;line-height:1.5;margin-top:2px}
+.dw-meta{font-size:13.8px;opacity:.85}
+.dw-title{font-size:19px;font-weight:700;line-height:1.5;margin-top:2px}
 .dw-head a{color:inherit;text-decoration:none;border:1px solid rgba(255,255,255,.4);border-radius:6px;
-  padding:6px 10px;font-size:12.5px;white-space:nowrap;display:inline-block}
+  padding:6px 10px;font-size:14.4px;white-space:nowrap;display:inline-block}
 .dw-head button{background:rgba(255,255,255,.16);color:inherit;border:0;border-radius:6px;
-  width:34px;height:34px;font-size:20px;line-height:1;cursor:pointer;flex:0 0 auto;font-family:inherit}
-.dw-note{padding:10px 16px;font-size:13px;line-height:1.75;background:var(--amberbg);color:var(--amber);
+  width:34px;height:34px;font-size:23px;line-height:1;cursor:pointer;flex:0 0 auto;font-family:inherit}
+.dw-note{padding:10px 16px;font-size:14.9px;line-height:1.75;background:var(--amberbg);color:var(--amber);
   border-bottom:1px solid var(--line)}
 .dw-note b{color:inherit}
 .drawer iframe{flex:1;width:100%;border:0;background:var(--bg)}
 .drawer iframe[hidden]{display:none}
-.dw-fallback{flex:1;overflow:auto;padding:18px 18px 40px;font-size:14.5px;line-height:1.85}
+.dw-fallback{flex:1;overflow:auto;padding:18px 18px 40px;font-size:16.7px;line-height:1.85}
 .dw-fallback[hidden]{display:none}
-.dw-fallback h5{margin:0 0 6px;font-size:15px;color:var(--green)}
+.dw-fallback h5{margin:0 0 6px;font-size:17.2px;color:var(--green)}
 .dw-fallback ol{margin:8px 0 18px;padding-left:22px}
 .dw-fallback li{margin-bottom:5px}
 .dw-fallback .pdfbtn{display:inline-block;background:var(--green);color:var(--bg);text-decoration:none;
@@ -170,7 +170,7 @@ footer{border-top:1px solid var(--line);margin-top:30px;padding:16px 0 40px;font
 :root[data-theme="dark"] .dw-fallback .pdfbtn{color:#16231e}
 .dw-fallback .sec{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);
   border-radius:7px;padding:12px 14px;margin-bottom:16px}
-.dw-fallback .why{color:var(--dim);font-size:13px}
+.dw-fallback .why{color:var(--dim);font-size:14.9px}
 </style>
 </head>
 <body>
@@ -407,7 +407,7 @@ footer{border-top:1px solid var(--line);margin-top:30px;padding:16px 0 40px;font
   <p><strong>二、先問適用範圍，再問數字。</strong>每一章幾乎都有「適用範圍」那一條。你的案子根本不適用的話，後面的數字再準也沒意義。</p>
   <p><strong>三、中央是底線，地方可能更嚴。</strong>查完中央，記得切到你基地所在的縣市再看一次。</p>
 
-  <p class="why" style="color:var(--dim);font-size:13px">完整版學生使用手冊（含設計快算逐項說明與自我檢測題）請向任課教師索取。</p>
+  <p class="why" style="color:var(--dim);font-size:14.9px">完整版學生使用手冊（含設計快算逐項說明與自我檢測題）請向任課教師索取。</p>
 </section>
 
 <!-- ====================================================== 資料來源 -->
@@ -1045,7 +1045,7 @@ document.getElementById('helpTry').innerHTML =
   .map(function(t){
     return '<a href="#" onclick="tryQ(' + JSON.stringify(t).replace(/"/g,'&quot;')
          + ');return false;" style="display:inline-block;border:1px solid var(--line);border-radius:999px;'
-         + 'padding:4px 12px;margin:3px 6px 3px 0;font-size:13.5px;color:var(--green);text-decoration:none">'
+         + 'padding:4px 12px;margin:3px 6px 3px 0;font-size:15.5px;color:var(--green);text-decoration:none">'
          + esc(t) + '</a>';
   }).join('');
 if (window.matchMedia('(max-width:860px)').matches)
