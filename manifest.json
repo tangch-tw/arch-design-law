@@ -1,0 +1,19 @@
+{
+  "name": "建築法規導航",
+  "short_name": "法規導航",
+  "description": "依設計階段、空間部位與使用類組查詢建築設計課常用法規條文，可離線使用。",
+  "lang": "zh-Hant",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1f4d3d",
+  "theme_color": "#1f4d3d",
+  "categories": ["education", "reference"],
+  "icons": [
+    { "src": "icon/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon/icon-1024.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any" }
+  ]
+}

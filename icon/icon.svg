@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- 配色取自頁面：深綠 #1f4d3d / #2c6b55，米白 #f7f5f0。
+       iOS 會自行套用圓角遮罩，因此底圖做滿版方形，主體內容收在中央安全區內。 -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2c6b55"/>
+      <stop offset="1" stop-color="#1b4535"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+
+  <!-- 主體：法 -->
+  <text x="512" y="628" text-anchor="middle"
+        font-family="Noto Sans CJK TC, Noto Sans TC, sans-serif" font-weight="900"
+        font-size="520" fill="#f7f5f0">法</text>
+
+  <!-- 比例尺：呼應建築製圖，兼作視覺基線 -->
+  <g stroke="#f7f5f0" stroke-width="18" stroke-linecap="square" opacity="0.92">
+    <line x1="250" y1="788" x2="774" y2="788"/>
+    <line x1="250" y1="788" x2="250" y2="732"/>
+    <line x1="381" y1="788" x2="381" y2="754"/>
+    <line x1="512" y1="788" x2="512" y2="732"/>
+    <line x1="643" y1="788" x2="643" y2="754"/>
+    <line x1="774" y1="788" x2="774" y2="732"/>
+  </g>
+</svg>

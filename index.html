@@ -2,9 +2,19 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>建築設計課程法規導航｜中國科技大學建築系</title>
 <meta name="description" content="依設計階段、空間部位與使用類組查詢建築設計課常用法規條文，資料取自 openlawtw 快照。">
+
+<!-- 加入主畫面後以獨立視窗開啟，並可離線使用 -->
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon/icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon/icon-192.png">
+<meta name="theme-color" content="#1f4d3d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="法規導航">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
 :root{
   --bg:#f7f5f0; --card:#ffffff; --ink:#272521; --dim:#6b655c; --line:#e0dbd1;
@@ -31,7 +41,12 @@
 body{margin:0;background:var(--bg);color:var(--ink);
   font:16px/1.75 "Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;}
 .wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+/* 加入主畫面後是全螢幕，狀態列與 Home 指示條會壓到內容上，這裡把安全區讓出來。
+   不支援 env() 的瀏覽器會落回原本的數值，桌機版外觀不變。 */
+.wrap{padding-left:calc(16px + env(safe-area-inset-left,0px));
+      padding-right:calc(16px + env(safe-area-inset-right,0px))}
 header{background:var(--green);color:#f7f5f0;padding:18px 0 14px}
+header{padding-top:calc(18px + env(safe-area-inset-top,0px))}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) header{background:#16231e;color:var(--ink)}}
 :root[data-theme="dark"] header{background:#16231e;color:var(--ink)}
 header h1{margin:0;font-size:21.8px;letter-spacing:.4px}
@@ -48,6 +63,7 @@ nav.tabs button{border:0;border-radius:6px 6px 0 0;padding:8px 14px;font-size:16
   background:rgba(255,255,255,.14);color:inherit;font-family:inherit}
 nav.tabs button[aria-selected="true"]{background:var(--bg);color:var(--green);font-weight:700}
 main{padding:18px 0 60px}
+main{padding-bottom:calc(60px + env(safe-area-inset-bottom,0px))}
 .panel{display:none}.panel.on{display:block}
 .grid{display:grid;grid-template-columns:238px minmax(0,1fr);gap:20px;align-items:start}
 .grid>*{min-width:0;max-width:100%}
@@ -1117,6 +1133,15 @@ calcA(); calcH(); calcB(); calcC(); calcD(); calcE();
       else if(typeof render==='function'){ render(); }
     }
   }catch(e){}
+})();
+
+/* 註冊離線快取。以 file:// 直接開啟或瀏覽器不支援時安靜略過，不影響任何既有功能。 */
+(function(){
+  if (!('serviceWorker' in navigator)) return;
+  if (location.protocol !== 'https:' && location.hostname !== 'localhost') return;
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js', { scope: './' }).catch(function(){});
+  });
 })();
 </script>
 </body>
