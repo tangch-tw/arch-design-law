@@ -173,15 +173,10 @@ footer{border-top:1px solid var(--line);margin-top:30px;padding:16px 0 40px;font
 .dw-note{padding:10px 16px;font-size:14.9px;line-height:1.75;background:var(--amberbg);color:var(--amber);
   border-bottom:1px solid var(--line)}
 .dw-note b{color:inherit}
-.drawer iframe{flex:1;width:100%;border:0;background:var(--bg)}
-.drawer iframe[hidden]{display:none}
 /* 捲動不要連動到背後的頁面 */
 .drawer{overscroll-behavior:contain}
-/* iframe 載入完成前擋住白底，避免手機上看到連續白閃 */
 .dw-body{position:relative;flex:1;min-height:0;display:flex;flex-direction:column}
-.dw-loading{position:absolute;inset:0;z-index:2;display:flex;align-items:center;
-  justify-content:center;background:var(--bg);color:var(--dim);font-size:15.5px;letter-spacing:.5px}
-.dw-loading[hidden]{display:none}
+.dw-links{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 18px}
 .dw-fallback{flex:1;overflow:auto;padding:18px 18px 40px;font-size:16.7px;line-height:1.85}
 .dw-fallback[hidden]{display:none}
 .dw-fallback h5{margin:0 0 6px;font-size:17.2px;color:var(--green)}
@@ -206,7 +201,6 @@ footer{border-top:1px solid var(--line);margin-top:30px;padding:16px 0 40px;font
   .dw-head{flex-wrap:wrap;gap:8px 10px;align-items:center}
   .dw-head .g{flex:1 1 0;min-width:0;order:1}
   .dw-head button{order:2;width:38px;height:38px}
-  .dw-head a{order:3;flex:1 1 100%;text-align:center;white-space:normal;padding:9px 10px}
   .dw-title{font-size:18px}
 }
 </style>
@@ -408,7 +402,7 @@ footer{border-top:1px solid var(--line);margin-top:30px;padding:16px 0 40px;font
   <p>條文太長會先收合，按「展開全文」看完整內容。<strong>含表格的條文不會收合</strong>，因為表格切一半更難讀。</p>
 
   <h2>側邊預覽與函釋</h2>
-  <p>按卡片上的「側邊預覽」，右側滑出面板，按 Esc 或點灰色背景關閉。</p>
+  <p>按卡片上的「側邊預覽」，右側滑出面板，顯示該條的完整原文（不摺疊），面板下方有函釋與官方原文的連結。按 Esc 或點灰色背景關閉。沒有網路時條文一樣看得到，連結則需要連網。</p>
   <p>一般條文載入的是 openlawtw 的該條頁面，可以<strong>條文與函釋並讀</strong>。法條寫得簡略，實務上常有爭議，主管機關會用公文函釋說明怎麼適用。當你不確定「我這個做法算不算」的時候，函釋裡常常就有一模一樣的案例。</p>
   <p>無障礙規範的官方 PDF 不允許被嵌在別的網頁裡，所以面板改成顯示該節全文、一顆開啟官方 PDF 對應頁的按鈕，以及<strong>該節有哪幾張圖、圖號是什麼、在第幾頁</strong>。按頁碼翻官方檔案就找得到。</p>
 
@@ -458,7 +452,7 @@ footer{border-top:1px solid var(--line);margin-top:30px;padding:16px 0 40px;font
 <section id="p-src" class="panel doc">
   <h2>這個頁面是什麼</h2>
   <p>依建築設計課的工作階段（D1 至 D5）整理的法規查詢介面，另將建築構造編、建築設備編、各類場所消防安全設備設置標準三部專編獨立列出，供建築構造與建築設備兩門課程整編瀏覽。每一張卡片都附上條文原文與官方連結，目的是讓沒有修過法規課的學生能夠核對，而不是只拿到一個答案。</p>
-  <p>卡片上的「側邊預覽」會在右側滑出 openlawtw 的該條頁面，可條文與國土管理署函釋並讀，不必跳離本頁。無障礙規範的卡片則直接滑出官方 PDF 的對應頁，圖就在上面。</p>
+  <p>卡片上的「側邊預覽」會在右側滑出該條的完整原文，並附上 openlawtw 函釋頁與全國法規資料庫原文的連結。原先是直接內嵌 openlawtw 的頁面，但該站會記住每部法規的上次閱讀位置並覆蓋網址錨點，導致開啟後停在別條條文，因此改為顯示本頁的條文快照，函釋改以新分頁開啟。無障礙規範的卡片同樣顯示本文，並附官方 PDF 的對應頁連結。</p>
   <p><strong>使用原則：看不到原文就當它沒回答。</strong>生成式工具很會編造條號，這個頁面的每一條都可以點回法務部全國法規資料庫核對。</p>
 
   <h2>收錄範圍</h2>
@@ -509,14 +503,11 @@ footer{border-top:1px solid var(--line);margin-top:30px;padding:16px 0 40px;font
       <div class="dw-meta" id="dwMeta"></div>
       <div class="dw-title" id="dwTitle"></div>
     </div>
-    <a id="dwOpen" href="#" target="_blank" rel="noopener">在新分頁開啟 ↗</a>
     <button onclick="closeDrawer()" aria-label="關閉側邊預覽">&times;</button>
   </div>
   <div class="dw-note" id="dwNote"></div>
   <div class="dw-body">
-    <iframe id="dwFrame" title="條文與函釋並讀" src="about:blank"></iframe>
-    <div class="dw-loading" id="dwLoading" hidden>條文載入中…</div>
-    <div class="dw-fallback" id="dwFallback" hidden></div>
+    <div class="dw-fallback" id="dwFallback"></div>
   </div>
 </aside>
 
@@ -909,28 +900,19 @@ function openDrawer(id){
     note.push('官方 PDF 實體第 ' + r.p1 + (r.p2 && r.p2 !== r.p1 ? '–' + r.p2 : '') + ' 頁');
     if (r.imgs && r.imgs.length) note.push('本節原 PDF 含 <b>' + r.imgs.length + ' 張尺寸圖</b>，圖號與頁碼列於下方');
   } else {
-    note.push(r.rc ? '這一條有 <b>' + r.rc + ' 筆國土管理署函釋</b>，右側可條文與函釋並讀'
+    note.push(r.rc ? '這一條有 <b>' + r.rc + ' 筆國土管理署函釋</b>，請按下方按鈕到 openlawtw 查看'
                    : '這一條目前無收錄函釋');
     if (r.fig && r.fig.length) note.push('含內政部官方補充圖例 ' + r.fig.length + ' 頁');
   }
-  if (r.trunc) note.push('<b>本條含表格且快照收錄不完整</b>，請以右側官方原文為準');
+  if (r.trunc) note.push('<b>本條含表格且快照收錄不完整</b>，請以官方原文為準');
   document.getElementById('dwNote').innerHTML = note.join('　｜　');
 
   var url = isA
     ? r.pdf + '#page=' + r.p1
     : 'https://openlawtw.vercel.app/laws/' + encodeURIComponent(r.lawId) + '.html#' + r.anchor;
-  var a = document.getElementById('dwOpen');
-  a.href = url;
-  a.textContent = isA ? '在新分頁開啟官方 PDF ↗' : '在新分頁開啟 openlawtw ↗';
-
-  var fr = document.getElementById('dwFrame');
   var fb = document.getElementById('dwFallback');
-  var pending = '';
   if (isA){
     /* 國土署的官方 PDF 不允許被內嵌，硬塞 iframe 只會得到一片空白，改給可用的東西 */
-    fr.src = 'about:blank';
-    fr.hidden = true;
-    document.getElementById('dwLoading').hidden = true;
     fb.hidden = false;
     var L = [];
     L.push('<h5>' + esc(r.chapter) + '　' + esc(r.no) + '</h5>');
@@ -949,52 +931,37 @@ function openDrawer(id){
     fb.innerHTML = L.join('');
     fb.scrollTop = 0;
   } else {
-    fb.hidden = true;
-    fb.innerHTML = '';
-    fr.hidden = false;
-    var ld = document.getElementById('dwLoading');
-    ld.hidden = false;
-    var done = false;
-    var show = function(){
-      if (done) return;
-      done = true;
-      ld.hidden = true;
-    };
-    fr.onload = function(){
-      /* 清空動作本身也會觸發 onload，要略過 */
-      if ((fr.getAttribute('src') || '') !== 'about:blank') show();
-    };
-    /* 載不動時不能一直卡在載入中，仍要讓使用者看到 iframe 與上方的外連按鈕 */
-    window.__dwTimer = setTimeout(show, 8000);
-    pending = url;
+    /* 不內嵌 openlawtw：該站會還原上次閱讀位置並蓋掉網址錨點，條文一定會開錯。
+       改用本頁的條文快照，正確性不依賴外站，沒有網路時一樣看得到。 */
+    var L = [];
+    if (r.path) L.push('<h5>' + esc(r.path) + '</h5>');
+    L.push('<div class="sec">' + esc(r.text) + '</div>');
+    if (r.trunc)
+      L.push('<p class="why">本條含表格，快照收錄不完整，數值請以官方原文核對。</p>');
+    L.push('<div class="dw-links">');
+    L.push('<a class="pdfbtn" href="' + esc(url) + '" target="_blank" rel="noopener">'
+         + (r.rc ? 'openlawtw 看 ' + r.rc + ' 筆函釋 ↗' : 'openlawtw 全文 ↗') + '</a>');
+    var fl = (r.no.match(/^第\s*([0-9]+(?:-[0-9]+)?)\s*條$/) || [])[1];
+    if (r.lawId.indexOf('-') < 0)
+      L.push('<a class="pdfbtn" href="https://law.moj.gov.tw/LawClass/'
+           + (fl ? 'LawSingle.aspx?pcode=' + encodeURIComponent(r.lawId) + '&flno=' + encodeURIComponent(fl)
+                 : 'LawAll.aspx?pcode=' + encodeURIComponent(r.lawId))
+           + '" target="_blank" rel="noopener">全國法規資料庫原文 ↗</a>');
+    if (r.figSrc)
+      L.push('<a class="pdfbtn" href="' + esc(r.figSrc)
+           + '" target="_blank" rel="noopener">官方補充圖例 ↗</a>');
+    L.push('</div>');
+    L.push('<p class="why">條文取自本頁的 openlawtw 快照，與卡片上的內容相同。'
+         + '函釋與官方原文需要連網，請按上面的按鈕在新分頁開啟。</p>');
+    fb.innerHTML = L.join('');
+    fb.scrollTop = 0;
   }
 
-  /* 抽屜必須先顯示，iframe 才有版面；沒有版面就捲不到網址後面的 #錨點，
-     條文會停在該法規最前面。設網址一定要排在這三行之後。 */
   document.getElementById('scrim').hidden = false;
   document.getElementById('drawer').hidden = false;
   document.body.style.overflow = 'hidden';
-
-  if (pending){
-    var prev = fr.getAttribute('data-url') || '';
-    if (prev && prev.split('#')[0] === pending.split('#')[0]){
-      /* 同一部法規只換條號：hash 變更不會觸發重載，必須先清空 */
-      fr.src = 'about:blank';
-      setTimeout(function(){ fr.src = pending; }, 30);
-    } else {
-      fr.src = pending;
-    }
-    fr.setAttribute('data-url', pending);
-  }
 }
 function closeDrawer(){
-  var fr = document.getElementById('dwFrame');
-  clearTimeout(window.__dwTimer);
-  fr.onload = null;
-  fr.removeAttribute('data-url');
-  fr.hidden = true;
-  fr.src = 'about:blank';
-  document.getElementById('dwLoading').hidden = true;
   document.getElementById('drawer').hidden = true;
   document.getElementById('scrim').hidden = true;
   document.body.style.overflow = '';

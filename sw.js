@@ -7,7 +7,7 @@
  *   先回快取讓畫面立刻出來，同時在背景向伺服器要新版寫回快取，
  *   下一次開啟就是新版。離線時沒有網路可要，直接用快取，功能不受影響。
  */
-const VERSION = '2026-11-28c';
+const VERSION = '2026-11-28d';
 const CACHE = 'arch-design-law-' + VERSION;
 
 const PRECACHE = [
