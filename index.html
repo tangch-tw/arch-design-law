@@ -178,8 +178,9 @@ footer{border-top:1px solid var(--line);margin-top:30px;padding:16px 0 40px;font
 /* 捲動不要連動到背後的頁面 */
 .drawer{overscroll-behavior:contain}
 /* iframe 載入完成前擋住白底，避免手機上看到連續白閃 */
-.dw-loading{flex:1;display:flex;align-items:center;justify-content:center;
-  background:var(--bg);color:var(--dim);font-size:15.5px;letter-spacing:.5px}
+.dw-body{position:relative;flex:1;min-height:0;display:flex;flex-direction:column}
+.dw-loading{position:absolute;inset:0;z-index:2;display:flex;align-items:center;
+  justify-content:center;background:var(--bg);color:var(--dim);font-size:15.5px;letter-spacing:.5px}
 .dw-loading[hidden]{display:none}
 .dw-fallback{flex:1;overflow:auto;padding:18px 18px 40px;font-size:16.7px;line-height:1.85}
 .dw-fallback[hidden]{display:none}
@@ -512,9 +513,11 @@ footer{border-top:1px solid var(--line);margin-top:30px;padding:16px 0 40px;font
     <button onclick="closeDrawer()" aria-label="關閉側邊預覽">&times;</button>
   </div>
   <div class="dw-note" id="dwNote"></div>
-  <div class="dw-loading" id="dwLoading" hidden>條文載入中…</div>
-  <iframe id="dwFrame" title="條文與函釋並讀" src="about:blank" hidden></iframe>
-  <div class="dw-fallback" id="dwFallback" hidden></div>
+  <div class="dw-body">
+    <iframe id="dwFrame" title="條文與函釋並讀" src="about:blank"></iframe>
+    <div class="dw-loading" id="dwLoading" hidden>條文載入中…</div>
+    <div class="dw-fallback" id="dwFallback" hidden></div>
+  </div>
 </aside>
 
 <footer class="wrap">
@@ -922,6 +925,7 @@ function openDrawer(id){
 
   var fr = document.getElementById('dwFrame');
   var fb = document.getElementById('dwFallback');
+  var pending = '';
   if (isA){
     /* 國土署的官方 PDF 不允許被內嵌，硬塞 iframe 只會得到一片空白，改給可用的東西 */
     fr.src = 'about:blank';
@@ -947,36 +951,41 @@ function openDrawer(id){
   } else {
     fb.hidden = true;
     fb.innerHTML = '';
+    fr.hidden = false;
     var ld = document.getElementById('dwLoading');
     ld.hidden = false;
-    fr.hidden = true;
     var done = false;
     var show = function(){
       if (done) return;
       done = true;
       ld.hidden = true;
-      fr.hidden = false;
     };
     fr.onload = function(){
       /* 清空動作本身也會觸發 onload，要略過 */
       if ((fr.getAttribute('src') || '') !== 'about:blank') show();
     };
-    /* 載不動時仍要讓使用者看到 iframe 與上方的外連按鈕，不能一直卡在載入中 */
+    /* 載不動時不能一直卡在載入中，仍要讓使用者看到 iframe 與上方的外連按鈕 */
     window.__dwTimer = setTimeout(show, 8000);
-    var prev = fr.getAttribute('data-url') || '';
-    if (prev && prev.split('#')[0] === url.split('#')[0]){
-      /* 同一部法規只換條號：hash 變更不會重載，必須先清空 */
-      fr.src = 'about:blank';
-      setTimeout(function(){ fr.src = url; }, 30);
-    } else {
-      fr.src = url;
-    }
-    fr.setAttribute('data-url', url);
+    pending = url;
   }
 
+  /* 抽屜必須先顯示，iframe 才有版面；沒有版面就捲不到網址後面的 #錨點，
+     條文會停在該法規最前面。設網址一定要排在這三行之後。 */
   document.getElementById('scrim').hidden = false;
   document.getElementById('drawer').hidden = false;
   document.body.style.overflow = 'hidden';
+
+  if (pending){
+    var prev = fr.getAttribute('data-url') || '';
+    if (prev && prev.split('#')[0] === pending.split('#')[0]){
+      /* 同一部法規只換條號：hash 變更不會觸發重載，必須先清空 */
+      fr.src = 'about:blank';
+      setTimeout(function(){ fr.src = pending; }, 30);
+    } else {
+      fr.src = pending;
+    }
+    fr.setAttribute('data-url', pending);
+  }
 }
 function closeDrawer(){
   var fr = document.getElementById('dwFrame');
