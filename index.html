@@ -187,6 +187,21 @@ footer{border-top:1px solid var(--line);margin-top:30px;padding:16px 0 40px;font
 .dw-fallback .sec{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);
   border-radius:7px;padding:12px 14px;margin-bottom:16px}
 .dw-fallback .why{color:var(--dim);font-size:14.9px}
+/* 加入主畫面後是全螢幕，抽屜的 top:0 會被狀態列蓋住，關閉鈕因此點不到；
+   底部同理會被 Home 指示條壓住。這裡把安全區讓出來，桌機因 env() 為 0 而不受影響。 */
+.drawer{padding-right:env(safe-area-inset-right,0px);
+        padding-bottom:env(safe-area-inset-bottom,0px)}
+.dw-head{padding-top:calc(13px + env(safe-area-inset-top,0px))}
+/* 窄螢幕下，標題列三個元素擠在同一列會把法規名稱壓成每行兩三個字。
+   改成：第一列放名稱與關閉鈕，外連按鈕移到第二列佔滿寬度。 */
+@media(max-width:560px){
+  .drawer{width:100%;border-left:0}
+  .dw-head{flex-wrap:wrap;gap:8px 10px;align-items:center}
+  .dw-head .g{flex:1 1 0;min-width:0;order:1}
+  .dw-head button{order:2;width:38px;height:38px}
+  .dw-head a{order:3;flex:1 1 100%;text-align:center;white-space:normal;padding:9px 10px}
+  .dw-title{font-size:18px}
+}
 </style>
 </head>
 <body>
